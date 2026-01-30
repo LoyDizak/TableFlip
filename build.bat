@@ -1,9 +1,9 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set "ENTRY_POINT=Source\Front.py"
+set "ENTRY_POINT=source\Front.py"
 set "APP_NAME=DOCX Analyze II"
-set "TARGET_DIR=Builds"
+set "TARGET_DIR=builds"
 set "BUILD_NAME=%APP_NAME%.exe"
 
 python3 -m PyInstaller --onefile --noconsole --name="%APP_NAME%" %ENTRY_POINT%

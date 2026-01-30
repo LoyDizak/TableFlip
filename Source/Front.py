@@ -1,13 +1,13 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
-from Parser import extract_docx_table, TableLayout, parse_table_data, add_data_to_persons_list, Person
-from JsonHandler import save_persons_to_json, load_persons_from_json
-from String import matrix_to_string, persons_list_to_string
 import logging
 import threading
-import Web
 from selenium.webdriver.common.by import By
-import time
+
+import web
+from string_converter import matrix_to_string, persons_list_to_string
+from parser import extract_docx_table, TableLayout, parse_table_data, add_data_to_persons_list
+from json_handler import save_persons_to_json, load_persons_from_json
 
 # logging.basicConfig(
 #     filename='application.log',
@@ -522,7 +522,7 @@ class App(tk.Tk):
             self.current_label.config(text=f"{idx+1}/{len(self.auto_persons)} — {display}")
             # use existing formatter to show all fields
             try:
-                from String import person_to_string
+                from string_converter import person_to_string
                 self.current_person_preview.insert(tk.END, person_to_string(p))
             except Exception:
                 # fallback: simple dict
@@ -558,7 +558,7 @@ class App(tk.Tk):
         try:
             # open page in background to avoid blocking UI
             def _open():
-                self.auto_driver = Web.open_page(url)
+                self.auto_driver = web.open_page(url)
             t = threading.Thread(target=_open, daemon=True)
             t.start()
         except Exception as e:
@@ -577,7 +577,7 @@ class App(tk.Tk):
             return
         person = self.auto_persons[self.current_index_var.get()]
         try:
-            Web.fill_person_form(self.auto_driver, person)
+            web.fill_person_form(self.auto_driver, person)
             self.update_current_person_preview()
         except Exception as e:
             messagebox.showerror("Ошибка", str(e))

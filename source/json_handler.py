@@ -1,6 +1,6 @@
 import json
 from dataclasses import asdict
-from Parser import Person
+from parser import Person
 import logging
 
 def save_persons_to_json(

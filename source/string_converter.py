@@ -1,4 +1,4 @@
-import Parser
+from parser import Person
 
 def matrix_to_string(table, max_width=None, padding=1):
     import shutil
@@ -46,7 +46,7 @@ def matrix_to_string(table, max_width=None, padding=1):
     return "\n".join(lines)
 
 
-def person_to_string(person: Parser.Person) -> str:
+def person_to_string(person: Person) -> str:
     """
     Возвращает личную информацию из объекта Person
     в аккуратно отформатированном виде.
@@ -75,7 +75,7 @@ def person_to_string(person: Parser.Person) -> str:
     return "\n".join(lines)
 
 
-def persons_list_to_string(persons: list[Parser.Person]) -> str:
+def persons_list_to_string(persons: list[Person]) -> str:
     all_persons = ""
     for person in persons:
         all_persons += person_to_string(person)
