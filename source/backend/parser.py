@@ -4,20 +4,25 @@ import logging
 from backend.data import TableLayout, Person
 
 
+
+
 def parse_table_data(table: list[list[str]], table_layout: TableLayout, start_row: int = 0) -> list[Person]:
     """
     Извлекает персональные данные из таблицы (двумерного списка)
     в список объектов Person на основе TableLayout.
     """
+
     persons = []
 
-    for row in table[start_row:]:
-        def get_cell(index: int) -> str:
-            """Возвращает значение ячейки или пустую строку, если индекс -1 или вне диапазона."""
-            if index == -1 or index >= len(row):
-                return ""
-            return row[index].strip()
+    def get_cell(index: int) -> str:
+        """Возвращает значение ячейки или пустую строку, если индекс -1 или вне диапазона."""
+        if index >= len(row):
+            raise
+        if index < 0:
+            return ""
+        return row[index].strip()
 
+    for row in table[start_row:]:
         person = Person(
             full_name=get_cell(table_layout.full_name),
             last_name= "",

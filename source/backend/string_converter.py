@@ -19,7 +19,6 @@ def matrix_to_string(table, max_width=None, padding=1):
     usable_width = max_width - (columns + 1)
     col_width = max(5, usable_width // columns)
 
-    # Обёртка текста для каждой ячейки
     wrapped_table = []
     for row in table:
         wrapped_row = [
@@ -38,7 +37,6 @@ def matrix_to_string(table, max_width=None, padding=1):
             line = "|"
             for cell in row:
                 text = cell[i] if i < len(cell) else ""
-                # выравнивание текста в ячейке по центру
                 line += text.center(col_width) + "|"
             lines.append(line)
         lines.append(horizontal)

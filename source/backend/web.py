@@ -19,12 +19,19 @@ def switch_to_active_window(driver: webdriver.Chrome) -> None:
    
 
 def find_input_field(driver: webdriver.Chrome, field_id: str) -> WebElement:
-    return driver.find_element(By.ID, field_id)
+    try:
+        return driver.find_element(By.ID, field_id)
+    except:
+        print(f"Не послучилось найти кнопку \"{field_id}\"")
+        raise
 
 
 def find_button(driver: webdriver.Chrome, button_value: str) -> WebElement:
-    return driver.find_element(By.XPATH, f"//input[@value='{button_value}']")
-
+    try:
+        return driver.find_element(By.XPATH, f"//input[@value='{button_value}']")
+    except:
+        print(f"Не послучилось найти кнопку \"{button_value}\"")
+        raise
 
 def set_input_field_value(driver: webdriver.Chrome, input_field: WebElement, value) -> None:
     if input_field.tag_name == 'input': # text field
@@ -39,31 +46,34 @@ def set_input_field_value(driver: webdriver.Chrome, input_field: WebElement, val
             print(f"Could not find value \"{value}\" in select options of {input_field.tag_name}")
 
 
-def open_page(url: str) -> webdriver.Chrome | None:
+def open_browser() -> webdriver.Chrome:
     chrome_options = Options()
     chrome_options.binary_location = CHROME_BINARY_LOCATION
 
     for argument in CHROME_BOOT_ARGUMENTS:
         chrome_options.add_argument(argument)
-    
+
     profile_dir = os.path.abspath(CHROME_PROFILE_LOCATION)
     if not os.path.exists(profile_dir):
         os.makedirs(profile_dir)
-    
+
     chrome_options.add_argument(f"--user-data-dir={profile_dir}")
 
     service = Service(executable_path=CHROME_DRIVER_LOCATION)
     driver = webdriver.Chrome(service=service, options=chrome_options)
-    
-    try: driver.get(url)
-    except: pass
-    
+
     return driver
 
+
 def fill_person_form(driver: webdriver.Chrome, person: Person) -> None:
+    switch_to_active_window(driver)
     for field_name, field_id in PERSON_FIELDS_WEB_MAP.items():
-        set_input_field_value(driver, find_input_field(driver, field_id), getattr(person, field_name))
+        input_field: WebElement = find_input_field(driver, field_id)
+        input_value: str = getattr(person, field_name)
+        set_input_field_value(driver, input_field, input_value)
+
 
 def confirm_entry(driver: webdriver.Chrome) -> None:
+    switch_to_active_window(driver)
     btn = find_button(driver, "Сохранить")
     btn.click()

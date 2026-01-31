@@ -7,7 +7,7 @@ class Person:
     first_name: str                         # Имя
     middle_name: str                        # Отчество
     snils: str                              # СНИЛС
-    position: str                         # Профессия (должность)
+    position: str                           # Профессия (должность)
     workplace: str                          # Место работы
     workplace_inn: str                      # ИНН организации работодателя
     training_program: str                   # Программа обучения
@@ -22,7 +22,7 @@ class Person:
 class TableLayout:
     full_name: int = -1                          # ФИО
     snils: int = -1                              # СНИЛС
-    position: int = -1                         # Профессия (должность)
+    position: int = -1                           # Профессия (должность)
     workplace: int = -1                          # Место работы
     workplace_inn: int = -1                      # ИНН организации работодателя
     training_program: int = -1                   # Программа обучения

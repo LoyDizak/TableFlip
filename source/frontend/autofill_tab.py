@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import threading
-from selenium.webdriver.common.by import By
+import os
 
 import backend.web as web
 from backend.json_handler import load_persons_from_json
@@ -21,8 +21,9 @@ class AutofillTab:
 
 
     def create_autofill_tab(self):
-        left = ttk.Frame(self.autofill_tab, width=360)
+        left = ttk.Frame(self.autofill_tab, width=450)
         left.pack(side='left', fill='y', padx=10, pady=10)
+        left.pack_propagate(False)
 
         right = ttk.Frame(self.autofill_tab)
         right.pack(side='left', fill='both', expand=True, padx=10, pady=10)
@@ -30,7 +31,7 @@ class AutofillTab:
         json_frame = ttk.LabelFrame(left, text="JSON")
         json_frame.pack(fill='x', pady=5)
         ttk.Button(json_frame, text="Открыть файл", command=self.on_button_load_json).pack(side='left', padx=5, pady=5)
-        self.current_json_label = ttk.Label(json_frame, text="Файл не выбран", wraplength=240)
+        self.current_json_label = ttk.Label(json_frame, text="Файл не выбран", wraplength=350)
         self.current_json_label.pack(side='left', padx=5)
 
         list_frame = ttk.LabelFrame(left, text="Текущий человек")
@@ -39,9 +40,9 @@ class AutofillTab:
         single_preview_frame = ttk.Frame(list_frame)
         single_preview_frame.pack(fill='both', expand=True, padx=3, pady=(3,6))
         self.current_person_preview = tk.Text(single_preview_frame, height=14, state='normal', wrap='none')
-        sp_v = ttk.Scrollbar(single_preview_frame, orient='vertical', command=self.current_person_preview.yview)
-        self.current_person_preview.configure(yscrollcommand=sp_v.set)
-        sp_v.pack(side='right', fill='y')
+        scroll_horizontal = ttk.Scrollbar(single_preview_frame, orient='horizontal', command=self.current_person_preview.xview)
+        self.current_person_preview.configure(xscrollcommand=scroll_horizontal.set)
+        scroll_horizontal.pack(side='bottom', fill='x')
         self.current_person_preview.pack(side='left', fill='both', expand=True)
 
         idx_frame = ttk.Frame(list_frame)
@@ -59,15 +60,10 @@ class AutofillTab:
         manual_index_entry.pack(side='left', padx=4)
         ttk.Button(manual_frame, text="Перейти", command=self.on_button_go_to_person_index).pack(side='left')
 
-        page_frame = ttk.LabelFrame(left, text="Страница")
-        page_frame.pack(fill='x', pady=5)
-        self.page_url_var = tk.StringVar()
-        page_url_entry = ttk.Entry(page_frame, textvariable=self.page_url_var, width=40)
-        page_url_entry.pack(fill='x', padx=3, pady=3)
-        ttk.Button(page_frame, text="Открыть страницу", command=self.on_button_open_web_page).pack(fill='x', padx=3, pady=3)
-
         actions = ttk.LabelFrame(left, text="Действия")
         actions.pack(fill='x', pady=5)
+        ttk.Button(actions, text="Открыть браузер", command=self.on_button_open_web_page).pack(fill='x', padx=3, pady=3)
+        ttk.Separator(actions, orient="horizontal").pack(fill="x", pady=5)
         ttk.Button(actions, text="Заполнить данные", command=self.on_button_fill_info).pack(fill='x', padx=3, pady=3)
         ttk.Button(actions, text="Подтвердить", command=self.on_button_confirm).pack(fill='x', padx=3, pady=3)
         ttk.Button(actions, text="Подтвердить и заполнить", command=self.on_button_confirm_and_fill).pack(fill='x', padx=3, pady=3)
@@ -91,7 +87,7 @@ class AutofillTab:
         try:
             persons = load_persons_from_json(path)
             self.persons = persons
-            self.current_json_label.config(text=path)
+            self.current_json_label.config(text=os.path.basename(path))
             self.current_person_index = 0
             self.update_current_person_preview()
             self.update_json_preview()
@@ -134,12 +130,10 @@ class AutofillTab:
         
 
     def on_button_open_web_page(self):
-        def open_web_page():
-            url = self.page_url_var.get()
-            self.web_driver = web.open_page(url)
-
+        if self.web_driver:
+            self.web_driver.quit()
         try:
-            thread = threading.Thread(target = open_web_page, daemon = True)
+            thread = threading.Thread(target = web.open_browser, daemon = True)
             thread.start()
         except Exception:
             messagebox.showerror("Ошибка", "Не удалось открыть страницу браузера")
