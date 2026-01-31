@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
-import logging
 import threading
 from selenium.webdriver.common.by import By
 
@@ -10,40 +9,27 @@ from string_converter import matrix_to_string, persons_list_to_string
 from parser import extract_docx_table, parse_table_data, add_data_to_persons_list
 from json_handler import save_persons_to_json, load_persons_from_json
 
-# logging.basicConfig(
-#     filename='application.log',
-#     level=logging.INFO,
-#     encoding='utf-8',  
-#     format='%(asctime)s - %(levelname)s - %(message)s'
-# )
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("DOCX Analyze v2   |   Автор программы: Артём Всяких")
+        self.title("DOCX Analyze II   |   Автор: Артём Всяких")
         self.geometry("1200x750")
-        
-        # Binding global keyboard shortcuts
-        self.bind('<Control-c>', self.on_copy_shortcut)
-        # self.bind('<Control-v>', self.on_paste_shortcut)
-        self.bind('<Control-x>', self.on_cut_shortcut)
-        self.bind('<Control-a>', self.on_select_all_shortcut)
 
         self.docx_path = ""
         self.table_data = []
         self.persons_list = []
 
-        # Используем Notebook, но создаём только одну вкладку — позже можно добавить вторую
         self.notebook = ttk.Notebook(self)
         self.notebook.pack(fill='both', expand=True)
 
         self.main_tab = ttk.Frame(self.notebook)
         self.notebook.add(self.main_tab, text="Парсинг")
 
-        self.create_main_ui()
+        self.create_parser_tab()
         self.create_autofill_tab()
 
-    def create_main_ui(self):
+    def create_parser_tab(self):
         # Делим окно на две колонки: слева — управление, справа — превью (таблица + результаты)
         left = ttk.Frame(self.main_tab, width=420)
         left.pack(side='left', fill='y', padx=10, pady=10)
@@ -115,7 +101,6 @@ class App(tk.Tk):
         table_preview_frame = ttk.LabelFrame(right, text="Предпросмотр таблицы")
         table_preview_frame.pack(fill='both', expand=True, pady=3)
 
-        # Use a grid inside the frame so horizontal and vertical scrollbars align correctly
         content = ttk.Frame(table_preview_frame)
         content.pack(fill='both', expand=True)
         content.rowconfigure(0, weight=1)
@@ -123,8 +108,6 @@ class App(tk.Tk):
 
         self.table_preview = tk.Text(content, height=12, wrap='none', state='normal')
         self.table_preview.grid(row=0, column=0, sticky='nsew')
-        self.setup_text_widget_menu(self.table_preview)
-        self.make_text_read_only(self.table_preview)
 
         table_scroll = ttk.Scrollbar(content, orient='vertical', command=self.table_preview.yview)
         table_scroll.grid(row=0, column=1, sticky='ns')
@@ -140,26 +123,11 @@ class App(tk.Tk):
 
         self.result_preview = tk.Text(result_frame, height=12, state='normal')
         self.result_preview.pack(side='left', fill='both', expand=True)
-        self.setup_text_widget_menu(self.result_preview)
-        self.make_text_read_only(self.result_preview)
         result_scroll = ttk.Scrollbar(result_frame, orient='vertical', command=self.result_preview.yview)
         result_scroll.pack(side='right', fill='y')
         self.result_preview.config(yscrollcommand=result_scroll.set)
 
     # ---------------- Text Widget Context Menu & Shortcuts ----------------
-    def make_text_read_only(self, text_widget):
-        """Make text widget read-only by blocking all edit events"""
-        def on_key(event):
-            if event.state & 0x4:  # Ctrl is pressed
-                return
-            if event.keysym in ('Control_L', 'Control_R'):
-                return
-            return 'break'
-        
-        def on_insert(event):
-            return 'break'
-        
-    
     def setup_entry_widget_menu(self, entry_widget):
         """Create context menu for entry widget"""
         context_menu = tk.Menu(entry_widget, tearoff=0)
@@ -212,99 +180,11 @@ class App(tk.Tk):
         entry_widget.select_range(0, tk.END)
         entry_widget.icursor(tk.END)
     
-    def setup_text_widget_menu(self, text_widget):
-        """Create context menu for text widget"""
-        context_menu = tk.Menu(text_widget, tearoff=0)
-        context_menu.add_command(label="Копировать", command=lambda: self.copy_text(text_widget))
-        context_menu.add_command(label="Вырезать", command=lambda: self.cut_text(text_widget))
-        context_menu.add_command(label="Вставить", command=lambda: self.paste_text(text_widget))
-        context_menu.add_separator()
-        context_menu.add_command(label="Выделить всё", command=lambda: self.select_all(text_widget))
-        
-        def show_context_menu(event):
-            try:
-                context_menu.tk_popup(event.x_root, event.y_root)
-            finally:
-                context_menu.grab_release()
-            return 'break'
-        
-        # Bind to right mouse button
-        text_widget.bind('<Button-3>', show_context_menu)
-    
-    def copy_text(self, text_widget):
-        """Copy selected text to clipboard"""
-        try:
-            text = text_widget.get(tk.SEL_FIRST, tk.SEL_LAST)
-            self.clipboard_clear()
-            self.clipboard_append(text)
-        except tk.TclError:
-            pass
-    
-    def cut_text(self, text_widget):
-        """Cut selected text to clipboard"""
-        try:
-            text = text_widget.get(tk.SEL_FIRST, tk.SEL_LAST)
-            self.clipboard_clear()
-            self.clipboard_append(text)
-        except tk.TclError:
-            pass
-    
-    def paste_text(self, text_widget):
-        """Paste text from clipboard"""
-        pass
-    
-    def select_all(self, text_widget):
-        """Select all text in widget"""
-        text_widget.tag_add(tk.SEL, '1.0', tk.END)
-        text_widget.mark_set(tk.INSERT, '1.0')
-        text_widget.see(tk.INSERT)
-    
-    def on_copy_shortcut(self, event):
-        """Handle Ctrl+C globally"""
-        widget = self.focus_get()
-        if isinstance(widget, tk.Text):
-            self.copy_text(widget)
-            return 'break'
-        elif isinstance(widget, ttk.Entry):
-            self.copy_entry(widget)
-            return 'break'
-    
-    def on_cut_shortcut(self, event):
-        """Handle Ctrl+X globally"""
-        widget = self.focus_get()
-        if isinstance(widget, tk.Text):
-            self.cut_text(widget)
-            return 'break'
-        elif isinstance(widget, ttk.Entry):
-            self.cut_entry(widget)
-            return 'break'
-    
-    def on_paste_shortcut(self, event):
-        """Handle Ctrl+V globally"""
-        widget = self.focus_get()
-        if isinstance(widget, tk.Text):
-            self.paste_text(widget)
-            return 'break'
-        elif isinstance(widget, ttk.Entry):
-            self.paste_entry(widget)
-            return 'break'
-    
-    def on_select_all_shortcut(self, event):
-        """Handle Ctrl+A globally"""
-        widget = self.focus_get()
-        if isinstance(widget, tk.Text):
-            self.select_all(widget)
-            return 'break'
-        elif isinstance(widget, ttk.Entry):
-            self.select_all_entry(widget)
-            return 'break'
-
     # ---------------- Actions ----------------
     def select_docx(self):
         path = filedialog.askopenfilename(filetypes=[("Word Documents", "*.docx")])
         if path:
             self.docx_path = path
-            # покороче путь в метке, переносим строку при необходимости
             self.docx_label.config(text=path)
 
     def load_table(self):
@@ -365,14 +245,8 @@ class App(tk.Tk):
 
     def save_json(self):
         path = filedialog.asksaveasfilename(filetypes=[("JSON files", "*.json")])
-        if not path:
-            return
-        if not path.lower().endswith('.json'):
-            path += '.json'
-        try:
+        if path:
             save_persons_to_json(path, self.persons_list)
-        except Exception as e:
-            messagebox.showerror("Ошибка", str(e))
 
     # ---------------- New Tab: Автозаполнение ----------------
     def create_autofill_tab(self):
@@ -387,7 +261,7 @@ class App(tk.Tk):
         # JSON loader
         json_frame = ttk.LabelFrame(left, text="JSON")
         json_frame.pack(fill='x', pady=5)
-        ttk.Button(json_frame, text="Открыть JSON", command=self.load_json_for_autofill).pack(side='left', padx=5, pady=5)
+        ttk.Button(json_frame, text="Открыть JSON", command=self.on_button_load_json_autofill).pack(side='left', padx=5, pady=5)
         self.autofill_json_label = ttk.Label(json_frame, text="Файл не выбран", wraplength=240)
         self.autofill_json_label.pack(side='left', padx=5)
 
@@ -400,8 +274,8 @@ class App(tk.Tk):
         single_preview_frame.pack(fill='both', expand=True, padx=3, pady=(3,6))
         # increase height so info fits at once
         self.current_person_preview = tk.Text(single_preview_frame, height=14, state='normal', wrap='none')
-        self.setup_text_widget_menu(self.current_person_preview)
-        self.make_text_read_only(self.current_person_preview)
+        # self.setup_text_widget_menu(self.current_person_preview)
+        # self.make_text_read_only(self.current_person_preview)
         sp_v = ttk.Scrollbar(single_preview_frame, orient='vertical', command=self.current_person_preview.yview)
         self.current_person_preview.configure(yscrollcommand=sp_v.set)
         sp_v.pack(side='right', fill='y')
@@ -410,12 +284,12 @@ class App(tk.Tk):
         # Navigation (fixed-width label so buttons don't shift)
         idx_frame = ttk.Frame(list_frame)
         idx_frame.pack(fill='x', padx=3, pady=2)
-        ttk.Button(idx_frame, text="◀", width=3, command=lambda: self.change_current_index(-1)).pack(side='left')
+        ttk.Button(idx_frame, text="◀", width=3, command=lambda: self.move_current_person_index(-1)).pack(side='left')
         self.current_index_var = tk.IntVar(value=0)
         # label centered between buttons (show index and name)
         self.current_label = ttk.Label(idx_frame, text="—", width=50, anchor='center')
         self.current_label.pack(side='left', padx=6, fill='x', expand=True)
-        ttk.Button(idx_frame, text="▶", width=3, command=lambda: self.change_current_index(1)).pack(side='left')
+        ttk.Button(idx_frame, text="▶", width=3, command=lambda: self.move_current_person_index(1)).pack(side='left')
 
         # Manual index entry to jump far without many clicks
         manual_frame = ttk.Frame(list_frame)
@@ -425,7 +299,7 @@ class App(tk.Tk):
         manual_index_entry = ttk.Entry(manual_frame, textvariable=self.manual_index_var, width=6)
         manual_index_entry.pack(side='left', padx=4)
         self.setup_entry_widget_menu(manual_index_entry)
-        ttk.Button(manual_frame, text="Перейти", command=self.go_to_manual_index).pack(side='left')
+        ttk.Button(manual_frame, text="Перейти", command=self.on_button_go_to_person_index).pack(side='left')
 
         # Page controls
         page_frame = ttk.LabelFrame(left, text="Страница")
@@ -434,14 +308,14 @@ class App(tk.Tk):
         page_url_entry = ttk.Entry(page_frame, textvariable=self.page_url_var, width=40)
         page_url_entry.pack(fill='x', padx=3, pady=3)
         self.setup_entry_widget_menu(page_url_entry)
-        ttk.Button(page_frame, text="Открыть страницу", command=self.open_page_autofill).pack(fill='x', padx=3, pady=3)
+        ttk.Button(page_frame, text="Открыть страницу", command=self.on_button_open_web_page).pack(fill='x', padx=3, pady=3)
 
         # Actions
         actions = ttk.LabelFrame(left, text="Действия")
         actions.pack(fill='x', pady=5)
-        ttk.Button(actions, text="Заполнить данные", command=self.threaded_autofill_selected).pack(fill='x', padx=3, pady=3)
-        ttk.Button(actions, text="Подтвердить", command=self.threaded_click_confirm).pack(fill='x', padx=3, pady=3)
-        ttk.Button(actions, text="Подтвердить и заполнить", command=self.threaded_confirm_next_fill).pack(fill='x', padx=3, pady=3)
+        ttk.Button(actions, text="Заполнить данные", command=self.on_button_fill_info).pack(fill='x', padx=3, pady=3)
+        ttk.Button(actions, text="Подтвердить", command=self.on_button_confirm).pack(fill='x', padx=3, pady=3)
+        ttk.Button(actions, text="Подтвердить и заполнить", command=self.on_button_confirm_and_fill).pack(fill='x', padx=3, pady=3)
 
 
         # Right: preview of selected person / JSON
@@ -451,8 +325,6 @@ class App(tk.Tk):
         content_preview = ttk.Frame(preview_frame)
         content_preview.pack(fill='both', expand=True)
         self.autofill_preview = tk.Text(content_preview, state='normal', wrap='none')
-        self.setup_text_widget_menu(self.autofill_preview)
-        self.make_text_read_only(self.autofill_preview)
         v_scroll = ttk.Scrollbar(content_preview, orient='vertical', command=self.autofill_preview.yview)
         self.autofill_preview.configure(yscrollcommand=v_scroll.set)
         v_scroll.pack(side='right', fill='y')
@@ -461,11 +333,8 @@ class App(tk.Tk):
         # Internal state for autofill
         self.auto_persons = []
         self.auto_driver = None
-        self._auto_fill_thread = None
-        self._auto_confirm_thread = None
-        self._last_filled_page_state = None  # track if we've filled the current page
 
-    def load_json_for_autofill(self):
+    def on_button_load_json_autofill(self):
         path = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")])
         if not path:
             return
@@ -512,7 +381,7 @@ class App(tk.Tk):
                 # fallback: simple dict
                 self.current_person_preview.insert(tk.END, str(p.__dict__))
 
-    def change_current_index(self, delta: int):
+    def move_current_person_index(self, delta: int):
         if not self.auto_persons:
             return
         idx = self.current_index_var.get() + delta
@@ -520,39 +389,38 @@ class App(tk.Tk):
         self.current_index_var.set(idx)
         self.update_current_person_preview()
 
-    def go_to_manual_index(self):
+    def on_button_go_to_person_index(self):
         if not self.auto_persons:
             messagebox.showwarning("Внимание", "Сначала загрузите JSON с людьми")
             return
         try:
-            v = int(self.manual_index_var.get())
+            new_index = int(self.manual_index_var.get())
         except Exception:
             messagebox.showerror("Ошибка", "Индекс должен быть числом")
             return
-        if v < 1:
-            v = 1
-        if v > len(self.auto_persons):
-            v = len(self.auto_persons)
-        idx = v - 1
-        self.current_index_var.set(idx)
+        
+        if new_index < 1:
+            new_index = 1
+        if new_index > len(self.auto_persons):
+            new_index = len(self.auto_persons)
+        
+        self.current_index_var.set(new_index - 1)
         self.update_current_person_preview()
 
-    def open_page_autofill(self):
+    def on_button_open_web_page(self):
         url = self.page_url_var.get()
         try:
             # open page in background to avoid blocking UI
             def _open():
                 self.auto_driver = web.open_page(url)
+            
             t = threading.Thread(target=_open, daemon=True)
             t.start()
+        
         except Exception as e:
             messagebox.showerror("Ошибка", str(e))
 
-    def threaded_autofill_selected(self):
-        t = threading.Thread(target=self.autofill_selected, daemon=True)
-        t.start()
-
-    def autofill_selected(self):
+    def on_button_fill_info(self):
         if not self.auto_driver:
             messagebox.showwarning("Внимание", "Сначала откройте страницу")
             return
@@ -566,11 +434,7 @@ class App(tk.Tk):
         except Exception as e:
             messagebox.showerror("Ошибка", str(e))
 
-    def threaded_click_confirm(self):
-        t = threading.Thread(target=self.click_confirm, daemon=True)
-        t.start()
-
-    def click_confirm(self):
+    def on_button_confirm(self):
         if not self.auto_driver:
             messagebox.showwarning("Внимание", "Сначала откройте страницу")
             return
@@ -586,38 +450,22 @@ class App(tk.Tk):
                     btn = None
             if btn:
                 btn.click()
-                self.change_current_index(1)
+                self.move_current_person_index(1)
             else:
                 messagebox.showwarning("Внимание", "Кнопка подтверждения не найдена на странице")
         except Exception as e:
             messagebox.showerror("Ошибка", str(e))
 
-    def threaded_fill_confirm_fill(self):
-        t = threading.Thread(target=self.fill_confirm_fill, daemon=True)
-        t.start()
 
-    def fill_confirm_fill(self):
-        # Fill
-        self.autofill_selected()
-        # Click confirm
-        self.click_confirm()
-        # Fill again (in case page navigated back или требуется повоторное заполнение)
-        self.autofill_selected()
-
-    def threaded_confirm_next_fill(self):
-        t = threading.Thread(target=self.confirm_next_fill, daemon=True)
-        t.start()
-
-    def confirm_next_fill(self):
+    def on_button_confirm_and_fill(self):
         # Click confirm (submit current)
-        self.click_confirm()
+        self.on_button_confirm()
         # Move to next person
-        self.change_current_index(1)
+        self.move_current_person_index(1)
         # Fill next person's data
-        self.autofill_selected()
+        self.on_button_fill_info()
 
 
 if __name__ == "__main__":
-    logging.info("\n\nНачалась новая сессия")
     app = App()
     app.mainloop()
