@@ -8,26 +8,7 @@ import time
 import os
 from typing import Optional
 
-from parser import Person
-
-
-fields_mapping = {
-    'last_name': ['LastName'],
-    'first_name': ['FirstName'],
-    'middle_name': ['MiddleName'],
-    'snils': ['SnilsTextBoxId', 'Snils'],
-    'position': ['Position'],
-    'workplace': ['EmployerTitle'],
-    'workplace_inn': ['EmployerInn'],
-    'training_program': ['LearnProgramIds', 'LearnProgramId', 'LearnProgram'],
-    'training_org': ['OrganizationTitle'],
-    # NOTE: HTML uses the same name/id for organization title and its INN in this local copy;
-    # include both candidates so the function can find the available element.
-    'training_org_inn': ['OrganizationTitle', 'OrganizationInn'],
-    'knowledge_result': ['IsPassed'],
-    'knowledge_check_date': ['TestDate', 'DateTest'],
-    'protocol_number': ['ProtocolNumber']
-    }
+from data import Person, PERSON_FIELDS_WEB_MAP, CHROME_BINARY_LOCATION, CHROME_DRIVER_LOCATION, CHROME_BOOT_ARGUMENTS, CHROME_PROFILE_LOCATION
 
 
 def switch_to_active_window(driver: webdriver.Chrome) -> None:
@@ -48,41 +29,15 @@ def switch_to_active_window(driver: webdriver.Chrome) -> None:
         logging.error(f"✗ Ошибка при переключении на активную вкладку: {e}")
 
 
-def find_info_field_by_name(driver: webdriver.Chrome, candidates: list[str]) -> Optional[WebElement]:
-    """
-    Ищет HTML элемент на странице по списку возможных идентификаторов.
-    
-    Пытается найти элемент сначала по ID, затем по NAME для каждого кандидата
-    из предоставленного списка.
-    
-    Параметры:
-    - driver: selenium webdriver объект
-    - candidates: список возможных ID/NAME элемента
-    
-    Возвращает:
-    - Найденный элемент WebElement или None если элемент не найден
-    """
-    logging.debug(f"Поиск элемента среди кандидатов: {candidates}")
-    for name in candidates:
-        try:
-            element = driver.find_element(By.ID, name)
-            logging.info(f"✓ Элемент найден по ID: {name}")
-            return element
-        except Exception as e:
-            logging.debug(f"  ✗ ID '{name}' не найден")
-            pass
-        try:
-            element = driver.find_element(By.NAME, name)
-            logging.info(f"✓ Элемент найден по NAME: {name}")
-            return element
-        except Exception as e:
-            logging.debug(f"  ✗ NAME '{name}' не найден")
-            pass
-    logging.warning(f"⚠ Ни один из кандидатов не найден: {candidates}")
-    return
+def find_input_field(driver: webdriver.Chrome, field_id: str) -> Optional[WebElement]:
+    element = driver.find_element(By.ID, field_id)
+    return element
+
+    # element = driver.find_element(By.NAME, name)
+    # return element
 
 
-def set_value(driver: webdriver.Chrome, element: WebElement, value) -> None:
+def set_input_field_value(driver: webdriver.Chrome, input_field: WebElement, value) -> None:
     """
     Устанавливает значение HTML элементу на странице.
     
@@ -95,7 +50,7 @@ def set_value(driver: webdriver.Chrome, element: WebElement, value) -> None:
     - value: значение для установки
     """
     try:
-        tag_name = element.tag_name.lower()
+        tag_name = input_field.tag_name.lower()
         logging.debug(f"Установка значения '{value}' для элемента типа '{tag_name}'")
         
         # Handle select elements
@@ -104,7 +59,7 @@ def set_value(driver: webdriver.Chrome, element: WebElement, value) -> None:
             # For select, we need to find and click the option with matching value
             try:
                 from selenium.webdriver.support.ui import Select
-                select = Select(element)
+                select = Select(input_field)
                 # Try to select by value first
                 try:
                     select.select_by_value(str(value))
@@ -118,7 +73,7 @@ def set_value(driver: webdriver.Chrome, element: WebElement, value) -> None:
         else:
             # For text inputs and other fields
             try:
-                driver.execute_script("arguments[0].focus(); arguments[0].value = arguments[1]; arguments[0].dispatchEvent(new Event('input')); arguments[0].dispatchEvent(new Event('change'));", element, value)
+                driver.execute_script("arguments[0].focus(); arguments[0].value = arguments[1]; arguments[0].dispatchEvent(new Event('input')); arguments[0].dispatchEvent(new Event('change'));", input_field, value)
                 logging.info(f"✓ Значение установлено через JavaScript для {tag_name}: {value}")
             except Exception as js_error:
                 logging.error(f"✗ Ошибка при выполнении JavaScript: {js_error}")
@@ -126,98 +81,62 @@ def set_value(driver: webdriver.Chrome, element: WebElement, value) -> None:
     except Exception as e:
         logging.debug(f"Попытка использования Selenium API для заполнения")
         try:
-            element.clear()
-            element.send_keys(value)
+            input_field.clear()
+            input_field.send_keys(value)
             logging.info(f"✓ Значение установлено через Selenium API: {value}")
         except Exception as api_error:
             logging.error(f"✗ Не удалось установить значение через Selenium API: {api_error}")
 
 
-def open_page(url: str, wait_time: float = 3, use_profile: bool = True) -> Optional[webdriver.Chrome]:
-    logging.info(f"═══ Открытие страницы ═══")
-    logging.info(f"URL: {url}")
-    logging.info(f"Использование сохраненного профиля: {'Да' if use_profile else 'Нет'}")
-    
+def open_page(url: str, use_profile: bool = True) -> Optional[webdriver.Chrome]:
     if url == "" or url.isspace():
-        logging.error("✗ Недействительная ссылка")
         return
 
-    try:
-        chrome_options = Options()
-        chrome_options.binary_location = "chrome-win64/chrome.exe"
+    chrome_options = Options()
+    chrome_options.binary_location = CHROME_BINARY_LOCATION
 
-        # Сохранение профиля браузера с куками и данными входа
-        if use_profile:
-            profile_dir = os.path.abspath("./chrome_profile")
-            if not os.path.exists(profile_dir):
-                os.makedirs(profile_dir)
-                logging.info(f"✓ Создана папка профиля: {profile_dir}")
-            else:
-                logging.info(f"✓ Используется существующий профиль: {profile_dir}")
+    # Сохранение профиля браузера с куками и данными входа
+    if use_profile:
+        profile_dir = os.path.abspath(CHROME_PROFILE_LOCATION)
+        if not os.path.exists(profile_dir):
+            os.makedirs(profile_dir)
+        else:
             chrome_options.add_argument(f"--user-data-dir={profile_dir}")
 
-        # Оптимизирующие флаги для производительности
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument("--disable-extensions")
-        chrome_options.add_argument("--disable-plugins")
-        chrome_options.add_argument("--disable-sync")
-        # chrome_options.add_argument("--disable-web-resources")
-        chrome_options.add_argument("--disable-default-apps")
-        chrome_options.add_argument("--disable-preconnect")
-        chrome_options.add_argument("--disable-background-networking")
-        chrome_options.add_argument("--disable-breakpad")
-        chrome_options.add_argument("--disable-hang-monitor")
-        chrome_options.add_argument("--disable-popup-blocking")
-        chrome_options.add_argument("--disable-prompt-on-repost")
-        chrome_options.add_argument("--disable-client-side-phishing-detection")
-        chrome_options.add_argument("--disable-ota-tag-stripping")
-        chrome_options.add_argument("--disable-save-password-bubble")
-        chrome_options.add_argument("--disable-background-timer-throttling")
-        # chrome_options.add_argument("--start-maximized")
-        
-        # Отключаем изображения для ускорения загрузки
-        prefs = {
-            "profile.managed_default_content_settings.images": 2  # 2 = отключить изображения
-        }
-        chrome_options.add_experimental_option("prefs", prefs)
+    for argument in CHROME_BOOT_ARGUMENTS:
+        chrome_options.add_argument(argument)
+    
+    # Отключаем изображения для ускорения загрузки
+    # prefs = {
+    #     "profile.managed_default_content_settings.images": 2  # 2 = отключить изображения
+    # }
+    # chrome_options.add_experimental_option("prefs", prefs)
 
-        service = Service(executable_path="chromedriver-win64/chromedriver.exe")
+    service = Service(executable_path=CHROME_DRIVER_LOCATION)
 
-        # Создаем объект браузера
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-        logging.info(f"✓ ChromeDriver инициализирован с оптимизацией производительности")
-        
-        # Переходим по URL
-        driver.get(url)
-        logging.info(f"✓ Переход по URL выполнен")
-        logging.info(f"Текущая страница: {driver.current_url}")
-        
-        # Ждем загрузки страницы
-        time.sleep(wait_time)
-        
-        # Проверяем открытые вкладки
-        for i, handle in enumerate(driver.window_handles):
-            driver.switch_to.window(handle)
-        
-        # Если открыто больше одной вкладки, переходим на последнюю
-        if len(driver.window_handles) > 1:
-            driver.switch_to.window(driver.window_handles[-1])
-            time.sleep(2)  # Даем время на загрузку новой вкладки
-        else:
-            # Переключаемся на первую (и единственную) вкладку
-            driver.switch_to.window(driver.window_handles[0])
-        
-        # Логируем информацию о странице для отладки
-        try:
-            page_title = driver.title
-        except:
-            pass
-        
-        return driver  # Возвращаем объект driver для дальнейших действий
-    except Exception as e:
-        return None
+    # Создаем объект браузера
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+    
+    # Переходим по URL
+    driver.get(url)
+
+    # Ждем загрузки страницы
+    # time.sleep(wait_time)
+    
+    # Проверяем открытые вкладки
+    for i, handle in enumerate(driver.window_handles):
+        driver.switch_to.window(handle)
+    
+    # Если открыто больше одной вкладки, переходим на последнюю
+    if len(driver.window_handles) > 1:
+        driver.switch_to.window(driver.window_handles[-1])
+        # time.sleep(2)
+    else:
+        # Переключаемся на первую (и единственную) вкладку
+        driver.switch_to.window(driver.window_handles[0])
+    
+    return driver  # Возвращаем объект driver для дальнейших действий
+
 
 
 def diagnose_page(driver: webdriver.Chrome) -> None:
@@ -280,13 +199,13 @@ def fill_person_form(driver: webdriver.Chrome, person: Person, wait: float = 0) 
             logging.debug(f"Поле '{key}': пусто, пропуск")
             continue
         logging.debug(f"Заполнение '{key}' = '{value}'")
-        info_field = find_info_field_by_name(driver, fields_mapping.get(key, []))
+        info_field = find_input_field(driver, PERSON_FIELDS_WEB_MAP.get(key, ""))
         if info_field:
-            set_value(driver, info_field, value)
+            set_input_field_value(driver, info_field, value)
             filled_count += 1
             time.sleep(wait)
         else:
-            logging.warning(f"⚠ Элемент для '{key}' не найден (искали: {fields_mapping.get(key)})")
+            logging.warning(f"⚠ Элемент для '{key}' не найден (искали: {PERSON_FIELDS_WEB_MAP.get(key, "")})")
 
     # Прочие поля
     other_attrs = ['snils','position','workplace','workplace_inn','training_program','training_org','training_org_inn','knowledge_result','knowledge_check_date','protocol_number']
@@ -296,9 +215,9 @@ def fill_person_form(driver: webdriver.Chrome, person: Person, wait: float = 0) 
             logging.debug(f"Поле '{attr}': пусто, пропуск")
             continue
         logging.debug(f"Заполнение '{attr}' = '{val}'")
-        info_field = find_info_field_by_name(driver, fields_mapping.get(attr, []))
+        info_field = find_input_field(driver, PERSON_FIELDS_WEB_MAP.get(attr, ""))
         if info_field:
-            set_value(driver, info_field, val)
+            set_input_field_value(driver, info_field, val)
             filled_count += 1
             time.sleep(wait)
             continue
@@ -307,7 +226,7 @@ def fill_person_form(driver: webdriver.Chrome, person: Person, wait: float = 0) 
         try:
             info_field_name = driver.find_element(By.NAME, attr)
             logging.info(f"✓ Элемент найден по NAME атрибуту: {attr}")
-            set_value(driver, info_field_name, val)
+            set_input_field_value(driver, info_field_name, val)
             filled_count += 1
             time.sleep(wait)
             continue

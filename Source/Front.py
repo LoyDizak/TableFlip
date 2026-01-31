@@ -5,8 +5,9 @@ import threading
 from selenium.webdriver.common.by import By
 
 import web
+from data import TableLayout, PERSON_FIELDS_RUSSIAN_NAMES
 from string_converter import matrix_to_string, persons_list_to_string
-from parser import extract_docx_table, TableLayout, parse_table_data, add_data_to_persons_list
+from parser import extract_docx_table, parse_table_data, add_data_to_persons_list
 from json_handler import save_persons_to_json, load_persons_from_json
 
 # logging.basicConfig(
@@ -27,23 +28,6 @@ class App(tk.Tk):
         # self.bind('<Control-v>', self.on_paste_shortcut)
         self.bind('<Control-x>', self.on_cut_shortcut)
         self.bind('<Control-a>', self.on_select_all_shortcut)
-
-        self.person_fields = {
-            "full_name": "ФИО",
-            "last_name": "Фамилия",
-            "first_name": "Имя",
-            "middle_name": "Отчество",
-            "snils": "СНИЛС",
-            "position": "Профессия (должность)",
-            "workplace": "Место работы",
-            "workplace_inn": "ИНН работодателя",
-            "training_program": "Программа обучения",
-            "training_org": "Организация обучения",
-            "training_org_inn": "ИНН организации обучения",
-            "knowledge_result": "Результат проверки знаний",
-            "knowledge_check_date": "Дата проверки знаний",
-            "protocol_number": "Номер протокола"
-        }
 
         self.docx_path = ""
         self.table_data = []
@@ -89,9 +73,9 @@ class App(tk.Tk):
 
         # создаём компактную сетку соответствий (числовые индексы столбцов)
         self.column_vars = {}
-        mapping_keys = [k for k in self.person_fields.keys() if k not in ("last_name", "first_name", "middle_name")]
+        mapping_keys = [k for k in PERSON_FIELDS_RUSSIAN_NAMES.keys() if k not in ("last_name", "first_name", "middle_name")]
         for row, key in enumerate(mapping_keys):
-            label_text = self.person_fields[key]
+            label_text = PERSON_FIELDS_RUSSIAN_NAMES[key]
             lbl = ttk.Label(mapping_frame, text=label_text)
             lbl.grid(row=row, column=0, sticky='w', padx=3, pady=2)
             var = tk.IntVar(value=-1)
@@ -114,7 +98,7 @@ class App(tk.Tk):
         add_frame = ttk.LabelFrame(left, text="Добавить значение ко всем")
         add_frame.pack(fill='x', pady=5)
         self.add_field_var = tk.StringVar()
-        self.add_field_combo = ttk.Combobox(add_frame, textvariable=self.add_field_var, state='readonly', values=list(self.person_fields.values()))
+        self.add_field_combo = ttk.Combobox(add_frame, textvariable=self.add_field_var, state='readonly', values=list(PERSON_FIELDS_RUSSIAN_NAMES.values()))
         self.add_field_combo.pack(fill='x', padx=3, pady=3)
         self.add_value_var = tk.StringVar()
         add_value_entry = ttk.Entry(add_frame, textvariable=self.add_value_var)
@@ -356,7 +340,7 @@ class App(tk.Tk):
         if not russian_name:
             messagebox.showwarning("Внимание", "Выберите поле")
             return
-        field = next((k for k, v in self.person_fields.items() if v == russian_name), None)
+        field = next((k for k, v in PERSON_FIELDS_RUSSIAN_NAMES.items() if v == russian_name), None)
         if not field:
             messagebox.showerror("Ошибка", "Неизвестное поле")
             return

@@ -1,38 +1,7 @@
-from dataclasses import dataclass
 from docx import Document
 import logging
 
-@dataclass
-class Person:
-    full_name: str                          # ФИО
-    last_name: str                          # Фамилия
-    first_name: str                         # Имя
-    middle_name: str                        # Отчество
-    snils: str                              # СНИЛС
-    position: str                         # Профессия (должность)
-    workplace: str                          # Место работы
-    workplace_inn: str                      # ИНН организации работодателя
-    training_program: str                   # Программа обучения
-    training_org: str                       # Организация, проводившая обучение
-    training_org_inn: str                   # ИНН организации, проводившей обучение
-    knowledge_result: str                   # Результат проверки знаний
-    knowledge_check_date: str               # Дата проверки знаний
-    protocol_number: str                    # Номер протокола проверки знания
-
-# Расположение необходимых столбцов с информацией. -1 если отсутсвует
-@dataclass
-class TableLayout:
-    full_name: int = -1                          # ФИО
-    snils: int = -1                              # СНИЛС
-    position: int = -1                         # Профессия (должность)
-    workplace: int = -1                          # Место работы
-    workplace_inn: int = -1                      # ИНН организации работодателя
-    training_program: int = -1                   # Программа обучения
-    training_org: int = -1                       # Организация, проводившая обучение
-    training_org_inn: int = -1                   # ИНН организации, проводившей обучение
-    knowledge_result: int = -1                   # Результат проверки знаний
-    knowledge_check_date: int = -1               # Дата проверки знаний
-    protocol_number: int = -1                    # Номер протокола проверки знания
+from data import TableLayout, Person
 
 
 def parse_table_data(table: list[list[str]], table_layout: TableLayout, start_row: int = 0) -> list[Person]:
