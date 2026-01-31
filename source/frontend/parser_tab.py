@@ -30,7 +30,7 @@ class ParserTab:
         file_frame = ttk.LabelFrame(left, text="Документ")
         file_frame.pack(fill='x', pady=5)
 
-        ttk.Button(file_frame, text="Выбрать .docx", command=self.select_docx).pack(side='left', padx=5, pady=5)
+        ttk.Button(file_frame, text="Выбрать файл", command=self.on_button_select_docx).pack(side='left', padx=5, pady=5)
         self.docx_label = ttk.Label(file_frame, text="Файл не выбран", wraplength=360)
         self.docx_label.pack(side='left', padx=5)
 
@@ -40,8 +40,7 @@ class ParserTab:
         self.table_index_var = tk.IntVar(value=0)
         table_index_entry = ttk.Entry(table_idx_frame, textvariable=self.table_index_var, width=6)
         table_index_entry.pack(side='left', padx=5)
-        self.app.setup_entry_widget_menu(table_index_entry)
-        ttk.Button(table_idx_frame, text="Загрузить таблицу", command=self.load_table).pack(side='left', padx=5)
+        ttk.Button(table_idx_frame, text="Загрузить таблицу", command=self.on_button_load_table).pack(side='left', padx=5)
 
         mapping_frame = ttk.LabelFrame(left, text="Соответствие столбцов")
         mapping_frame.pack(fill='both', pady=5)
@@ -57,7 +56,6 @@ class ParserTab:
             self.column_vars[key] = var
             entry = ttk.Entry(mapping_frame, textvariable=var, width=6)
             entry.grid(row=row, column=1, padx=3, pady=2)
-            self.app.setup_entry_widget_menu(entry)
 
         # Start row
         start_frame = ttk.Frame(left)
@@ -66,9 +64,8 @@ class ParserTab:
         self.start_row_var = tk.IntVar(value=0)
         start_row_entry = ttk.Entry(start_frame, textvariable=self.start_row_var, width=6)
         start_row_entry.pack(side='left', padx=5)
-        self.app.setup_entry_widget_menu(start_row_entry)
 
-        ttk.Button(left, text="Выполнить парсинг", command=self.parse_table).pack(fill='x', pady=6)
+        ttk.Button(left, text="Выполнить парсинг", command=self.on_button_parse_table).pack(fill='x', pady=6)
 
         add_frame = ttk.LabelFrame(left, text="Добавить значение ко всем")
         add_frame.pack(fill='x', pady=5)
@@ -78,12 +75,12 @@ class ParserTab:
         self.add_value_var = tk.StringVar()
         add_value_entry = ttk.Entry(add_frame, textvariable=self.add_value_var)
         add_value_entry.pack(fill='x', padx=3, pady=3)
-        self.app.setup_entry_widget_menu(add_value_entry)
-        ttk.Button(add_frame, text="Добавить ко всем", command=self.add_additional_data).pack(fill='x', padx=3, pady=3)
+        # self.app.setup_entry_widget_menu(add_value_entry)
+        ttk.Button(add_frame, text="Добавить ко всем", command=self.on_button_add_data_to_all).pack(fill='x', padx=3, pady=3)
 
         save_frame = ttk.Frame(left)
         save_frame.pack(fill='x', pady=5)
-        ttk.Button(save_frame, text="Сохранить JSON", command=self.save_json).pack(fill='x', padx=0, pady=0)
+        ttk.Button(save_frame, text="Сохранить JSON", command=self.on_button_save_json).pack(fill='x', padx=0, pady=0)
 
         # --- Right: Previews (можно прокручивать) ---
         # Верхняя: предпросмотр таблицы
@@ -117,13 +114,13 @@ class ParserTab:
         self.result_preview.config(yscrollcommand=result_scroll.set)
 
     # ---------------- Parsing Functions ----------------
-    def select_docx(self):
+    def on_button_select_docx(self):
         path = filedialog.askopenfilename(filetypes=[("DOCX files", "*.docx")])
         if path:
             self.docx_path = path
             self.docx_label.config(text=path)
 
-    def load_table(self):
+    def on_button_load_table(self):
         if not self.docx_path:
             messagebox.showwarning("Внимание", "Сначала выберите .docx файл")
             return
@@ -136,7 +133,7 @@ class ParserTab:
         except Exception as e:
             messagebox.showerror("Ошибка", str(e))
 
-    def parse_table(self):
+    def on_button_parse_table(self):
         if not self.table_data:
             messagebox.showwarning("Внимание", "Сначала загрузите таблицу")
             return
@@ -156,7 +153,7 @@ class ParserTab:
         except Exception as e:
             messagebox.showerror("Ошибка", str(e))
 
-    def add_additional_data(self):
+    def on_button_add_data_to_all(self):
         if not self.persons_list:
             messagebox.showwarning("Внимание", "Сначала выполните парсинг")
             return
@@ -182,7 +179,7 @@ class ParserTab:
         except Exception as e:
             messagebox.showerror("Ошибка", str(e))
 
-    def save_json(self):
+    def on_button_save_json(self):
         if not self.persons_list:
             messagebox.showwarning("Внимание", "Нет данных для сохранения")
             return
@@ -194,3 +191,4 @@ class ParserTab:
             messagebox.showinfo("Успех", f"Сохранено в {path}")
         except Exception as e:
             messagebox.showerror("Ошибка", str(e))
+
