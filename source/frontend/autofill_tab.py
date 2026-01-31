@@ -18,7 +18,8 @@ class AutofillTab:
         self.web_driver = None
         
         self.create_autofill_tab()
-    
+
+
     def create_autofill_tab(self):
         left = ttk.Frame(self.autofill_tab, width=360)
         left.pack(side='left', fill='y', padx=10, pady=10)
@@ -28,9 +29,9 @@ class AutofillTab:
 
         json_frame = ttk.LabelFrame(left, text="JSON")
         json_frame.pack(fill='x', pady=5)
-        ttk.Button(json_frame, text="Открыть JSON", command=self.on_button_load_json_autofill).pack(side='left', padx=5, pady=5)
-        self.autofill_json_label = ttk.Label(json_frame, text="Файл не выбран", wraplength=240)
-        self.autofill_json_label.pack(side='left', padx=5)
+        ttk.Button(json_frame, text="Открыть файл", command=self.on_button_load_json).pack(side='left', padx=5, pady=5)
+        self.current_json_label = ttk.Label(json_frame, text="Файл не выбран", wraplength=240)
+        self.current_json_label.pack(side='left', padx=5)
 
         list_frame = ttk.LabelFrame(left, text="Текущий человек")
         list_frame.pack(fill='both', expand=False, pady=5)
@@ -53,7 +54,7 @@ class AutofillTab:
         manual_frame = ttk.Frame(list_frame)
         manual_frame.pack(fill='x', padx=3, pady=(2,4))
         self.manual_index_var = tk.StringVar(value='0')
-        ttk.Label(manual_frame, text="Индекс:").pack(side='left')
+        ttk.Label(manual_frame, text="Номер:").pack(side='left')
         manual_index_entry = ttk.Entry(manual_frame, textvariable=self.manual_index_var, width=6)
         manual_index_entry.pack(side='left', padx=4)
         ttk.Button(manual_frame, text="Перейти", command=self.on_button_go_to_person_index).pack(side='left')
@@ -71,8 +72,7 @@ class AutofillTab:
         ttk.Button(actions, text="Подтвердить", command=self.on_button_confirm).pack(fill='x', padx=3, pady=3)
         ttk.Button(actions, text="Подтвердить и заполнить", command=self.on_button_confirm_and_fill).pack(fill='x', padx=3, pady=3)
 
-
-        preview_frame = ttk.LabelFrame(right, text="Предпросмотр JSON")
+        preview_frame = ttk.LabelFrame(right, text="Предпросмотр данных")
         preview_frame.pack(fill='both', expand=True)
         content_preview = ttk.Frame(preview_frame)
         content_preview.pack(fill='both', expand=True)
@@ -82,26 +82,27 @@ class AutofillTab:
         v_scroll.pack(side='right', fill='y')
         self.autofill_preview.pack(side='left', fill='both', expand=True)
 
-    def on_button_load_json_autofill(self):
+
+    def on_button_load_json(self):
         path = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")])
         if not path:
+            messagebox.showerror("Ошибка", "Вы указали неверный путь")
             return
         try:
             persons = load_persons_from_json(path)
             self.persons = persons
-            self.autofill_json_label.config(text=path)
+            self.current_json_label.config(text=path)
             self.current_person_index = 0
             self.update_current_person_preview()
-            self.update_autofill_preview()
+            self.update_json_preview()
         except Exception as e:
-            messagebox.showerror("Ошибка", str(e))
+            messagebox.showerror("Ошибка", "Не удалось загрузить файл")
 
-    def update_autofill_preview(self):
+
+    def update_json_preview(self):
         self.autofill_preview.delete(1.0, tk.END)
-        try:
-            self.autofill_preview.insert(tk.END, persons_list_to_string(self.persons))
-        except Exception:
-            self.autofill_preview.insert(tk.END, "Нет данных")
+        self.autofill_preview.insert(tk.END, persons_list_to_string(self.persons))
+
 
     def update_current_person_preview(self):
         self.current_person_preview.delete(1.0, tk.END)
@@ -111,15 +112,14 @@ class AutofillTab:
         else:
             current_person = self.persons[self.current_person_index]
             self.current_label.config(text=f"{self.current_person_index}/{len(self.persons)-1} — {current_person.full_name}")
-            try:
-                self.current_person_preview.insert(tk.END, person_to_string(current_person))
-            except Exception:
-                self.current_person_preview.insert(tk.END, str(current_person.__dict__))
+            self.current_person_preview.insert(tk.END, person_to_string(current_person))
+
 
     def change_current_person(self, new_index:int):
         new_index = max(0, min(new_index, len(self.persons) - 1))
         self.current_person_index = new_index
         self.update_current_person_preview()
+
 
     def on_button_go_to_person_index(self):
         if not self.persons:
@@ -129,64 +129,46 @@ class AutofillTab:
             new_index = int(self.manual_index_var.get())
             self.change_current_person(new_index)
         except Exception:
-            messagebox.showerror("Ошибка", "Индекс должен быть числом")
+            messagebox.showerror("Ошибка", "Неверный формат номера")
             return
         
+
     def on_button_open_web_page(self):
-        url = self.page_url_var.get()
+        def open_web_page():
+            url = self.page_url_var.get()
+            self.web_driver = web.open_page(url)
+
         try:
-            # open page in background to avoid blocking UI
-            def _open():
-                self.web_driver = web.open_page(url)
-            
-            t = threading.Thread(target=_open, daemon=True)
-            t.start()
-        
-        except Exception as e:
-            messagebox.showerror("Ошибка", str(e))
+            thread = threading.Thread(target = open_web_page, daemon = True)
+            thread.start()
+        except Exception:
+            messagebox.showerror("Ошибка", "Не удалось открыть страницу браузера")
+
 
     def on_button_fill_info(self):
         if not self.web_driver:
             messagebox.showwarning("Внимание", "Сначала откройте страницу")
             return
         if not self.persons:
-            messagebox.showwarning("Внимание", "Сначала загрузите JSON с людьми")
+            messagebox.showwarning("Внимание", "Сначала откройте файл с данными")
             return
-        person = self.persons[self.current_person_index]
         try:
-            web.fill_person_form(self.web_driver, person)
-            self.update_current_person_preview()
-        except Exception as e:
-            messagebox.showerror("Ошибка", str(e))
+            web.fill_person_form(self.web_driver, self.persons[self.current_person_index])
+        except Exception:
+            messagebox.showerror("Ошибка", "Не удалось заполнить данные")
+
 
     def on_button_confirm(self):
         if not self.web_driver:
             messagebox.showwarning("Внимание", "Сначала откройте страницу")
             return
         try:
-            drv = self.web_driver
-            # попробуем найти кнопку submit с текстом "Сохранить"
-            try:
-                btn = drv.find_element(By.XPATH, "//input[@type='submit' and (@value='Сохранить' or @value='Save')]")
-            except Exception:
-                try:
-                    btn = drv.find_element(By.CSS_SELECTOR, "input[type='submit'].btn.btn-primary")
-                except Exception:
-                    btn = None
-            if btn:
-                btn.click()
-                self.change_current_person(self.current_person_index + 1)
-            else:
-                messagebox.showwarning("Внимание", "Кнопка подтверждения не найдена на странице")
-        except Exception as e:
-            messagebox.showerror("Ошибка", str(e))
+            web.confirm_entry(self.web_driver)
+        except Exception:
+            messagebox.showerror("Ошибка", "Не удалось найти кнопку подтверждения")
 
 
     def on_button_confirm_and_fill(self):
-        # Click confirm (submit current)
         self.on_button_confirm()
-        # Move to next person
         self.change_current_person(self.current_person_index + 1)
-        # Fill next person's data
         self.on_button_fill_info()
-        
