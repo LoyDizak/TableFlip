@@ -1,6 +1,7 @@
 import json
 from dataclasses import asdict
-from data import Person
+
+from backend.data import Person
 
 def save_persons_to_json(file_path: str, persons: list[Person]) -> None:
     data = [asdict(person) for person in persons]

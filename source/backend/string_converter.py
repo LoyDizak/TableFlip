@@ -1,4 +1,4 @@
-from parser import Person
+from backend.data import Person
 
 def matrix_to_string(table, max_width=None, padding=1):
     import shutil

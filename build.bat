@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set "ENTRY_POINT=source\Front.py"
+set "ENTRY_POINT=source\main.py"
 set "APP_NAME=DOCX Analyze II"
 set "TARGET_DIR=builds"
 set "BUILD_NAME=%APP_NAME%.exe"

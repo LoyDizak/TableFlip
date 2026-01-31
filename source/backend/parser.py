@@ -1,7 +1,7 @@
 from docx import Document
 import logging
 
-from data import TableLayout, Person
+from backend.data import TableLayout, Person
 
 
 def parse_table_data(table: list[list[str]], table_layout: TableLayout, start_row: int = 0) -> list[Person]:
