@@ -9,14 +9,14 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("DOCX Analyze II   |   Автор: Артём Всяких")
-        self.geometry("1200x750")
+        self.geometry("1200x670")
 
         self.notebook = ttk.Notebook(self)
         self.notebook.pack(fill='both', expand=True)
 
         # Create parser tab
         self.parser_tab = ParserTab(self.notebook, self)
-        self.notebook.add(self.parser_tab.main_tab, text="Парсинг")
+        self.notebook.add(self.parser_tab.main_tab, text="Извлечение данных")
 
         # Create autofill tab
         self.autofill_tab = AutofillTab(self.notebook, self)

@@ -62,7 +62,7 @@ class ParserTab:
         start_row_entry = ttk.Entry(start_frame, textvariable=self.start_row_var, width=6)
         start_row_entry.pack(side='left', padx=5)
 
-        ttk.Button(left, text="Собрать данные из таблицы", command=self.on_button_parse_table).pack(fill='x', pady=6)
+        ttk.Button(left, text="Извлечь данные из таблицы", command=self.on_button_parse_table).pack(fill='x', pady=6)
 
         add_frame = ttk.LabelFrame(left, text="Добавить значение ко всем")
         add_frame.pack(fill='x', pady=5)

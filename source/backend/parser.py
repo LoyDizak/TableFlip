@@ -45,8 +45,8 @@ def parse_table_data(table: list[list[str]], table_layout: TableLayout, start_ro
             person.last_name = split_name[0]
             person.first_name = split_name[1]
             person.middle_name = split_name[2]
-        else:
-            logging.error(f"Не получилось разделить ФИО на составляющие: {person.full_name}")
+        # else:
+        #     logging.error(f"Не получилось разделить ФИО на составляющие: {person.full_name}")
 
         persons.append(person)
 
