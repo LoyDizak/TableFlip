@@ -78,23 +78,7 @@ class AutofillTab:
         v_scroll.pack(side='right', fill='y')
         self.autofill_preview.pack(side='left', fill='both', expand=True)
 
-
-    def on_button_load_json(self):
-        path = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")])
-        if not path:
-            messagebox.showerror("Ошибка", "Вы указали неверный путь")
-            return
-        try:
-            persons = load_persons_from_json(path)
-            self.persons = persons
-            self.current_json_label.config(text=os.path.basename(path))
-            self.current_person_index = 0
-            self.update_current_person_preview()
-            self.update_json_preview()
-        except Exception as e:
-            messagebox.showerror("Ошибка", "Не удалось загрузить файл")
-
-
+    
     def update_json_preview(self):
         self.autofill_preview.delete(1.0, tk.END)
         self.autofill_preview.insert(tk.END, persons_list_to_string(self.persons))
@@ -117,7 +101,29 @@ class AutofillTab:
         self.update_current_person_preview()
 
 
+    def on_button_load_json(self):
+        if not self.app.check_license():
+            return
+
+        path = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")])
+        if not path:
+            messagebox.showerror("Ошибка", "Вы указали неверный путь")
+            return
+        try:
+            persons = load_persons_from_json(path)
+            self.persons = persons
+            self.current_json_label.config(text=os.path.basename(path))
+            self.current_person_index = 0
+            self.update_current_person_preview()
+            self.update_json_preview()
+        except Exception as e:
+            messagebox.showerror("Ошибка", "Не удалось загрузить файл")
+
+
     def on_button_go_to_person_index(self):
+        if not self.app.check_license():
+            return
+
         if not self.persons:
             messagebox.showwarning("Внимание", "Сначала загрузите JSON с людьми")
             return
@@ -130,6 +136,9 @@ class AutofillTab:
         
 
     def on_button_open_web_page(self):
+        if not self.app.check_license():
+            return
+
         if self.web_driver:
             self.web_driver.quit()
         try:
@@ -140,6 +149,9 @@ class AutofillTab:
 
 
     def on_button_fill_info(self):
+        if not self.app.check_license():
+            return
+
         if not self.web_driver:
             messagebox.showwarning("Внимание", "Сначала откройте страницу")
             return
@@ -153,6 +165,9 @@ class AutofillTab:
 
 
     def on_button_confirm(self):
+        if not self.app.check_license():
+            return
+
         if not self.web_driver:
             messagebox.showwarning("Внимание", "Сначала откройте страницу")
             return
@@ -163,6 +178,9 @@ class AutofillTab:
 
 
     def on_button_confirm_and_fill(self):
+        if not self.app.check_license():
+            return
+
         self.on_button_confirm()
         self.change_current_person(self.current_person_index + 1)
         self.on_button_fill_info()

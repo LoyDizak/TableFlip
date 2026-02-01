@@ -7,7 +7,6 @@ from backend.string_converter import matrix_to_string, persons_list_to_string
 from backend.parser import extract_docx_table, parse_table_data, add_data_to_persons_list
 from backend.json_handler import save_persons_to_json, load_persons_from_json
 
-
 class ParserTab:
     def __init__(self, parent, app):
         self.app = app
@@ -133,6 +132,9 @@ class ParserTab:
 
 
     def on_button_select_docx(self):
+        if not self.app.check_license():
+            return
+
         path = filedialog.askopenfilename(filetypes=[("DOCX files", "*.docx")])
         if path:
             self.table_index_var.set(0)
@@ -142,9 +144,12 @@ class ParserTab:
 
 
     def on_button_load_table(self):
+        if not self.app.check_license():
+            return
         if not self.docx_path:
             messagebox.showwarning("Внимание", "Сначала выберите .docx файл")
             return
+        
         try:
             table_index = int(self.table_index_var.get())
             self.table_data = extract_docx_table(self.docx_path, table_index)
@@ -154,6 +159,9 @@ class ParserTab:
 
 
     def on_button_parse_table(self):
+        if not self.app.check_license():
+            return
+
         if not self.table_data:
             messagebox.showwarning("Внимание", "Сначала загрузите таблицу")
             return
@@ -186,6 +194,9 @@ class ParserTab:
 
 
     def on_button_add_data_to_all(self):
+        if not self.app.check_license():
+            return
+
         if not self.persons_list:
             messagebox.showwarning("Внимание", "Сначала извлеките данные из таблицы")
             return
@@ -212,6 +223,9 @@ class ParserTab:
 
 
     def on_button_save_json(self):
+        if not self.app.check_license():
+            return
+
         if not self.persons_list:
             messagebox.showwarning("Внимание", "Нет данных для сохранения")
             return
