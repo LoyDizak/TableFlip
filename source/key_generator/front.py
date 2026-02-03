@@ -241,7 +241,7 @@ class LicenseGeneratorApp(tk.Tk):
         # Кнопка генерации
         ttk.Button(
             params_frame,
-            text="Сгенерировать лицензию (F5)",
+            text="Сгенерировать лицензию",
             command=self.generate_license
         ).pack(pady=10)
         
@@ -267,13 +267,13 @@ class LicenseGeneratorApp(tk.Tk):
         
         ttk.Button(
             buttons,
-            text="Копировать ключ (Ctrl+Shift+C)",
+            text="Копировать ключ",
             command=self.copy_license_key
         ).pack(side='left', padx=5)
         
         ttk.Button(
             buttons,
-            text="Сохранить в файл (Ctrl+S)",
+            text="Сохранить в файл",
             command=self.save_license_to_file
         ).pack(side='left', padx=5)
         
@@ -557,8 +557,8 @@ class LicenseGeneratorApp(tk.Tk):
             return
         
         file_path = filedialog.asksaveasfilename(
-            defaultextension=".lic",
-            filetypes=[("License files", "*.lic"), ("Text files", "*.txt"), ("All files", "*.*")]
+            defaultextension=".key",
+            filetypes=[("License files", "*.key")]
         )
         
         if file_path:

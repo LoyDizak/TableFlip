@@ -126,9 +126,7 @@ class LicenseSystem:
 
     def _verify_license_signature(self, license_data: dict, signature: bytes) -> bool:
         """Проверить подпись лицензии"""
-        if not self.public_key:
-            return True
-        
+  
         pem_key = f"-----BEGIN PUBLIC KEY-----\n{self.public_key}\n-----END PUBLIC KEY-----"
 
         # Загружаем публичный ключ
@@ -190,9 +188,6 @@ class LicenseSystem:
         Returns: is_valid
         """
 
-        if not self.public_key:
-            return True
-        
         # 1. Проверка на подмену даты
         if not self._check_date_tampering():
             return False
@@ -263,5 +258,8 @@ class LicenseSystem:
         except FileNotFoundError:
             return ""
     
-    def is_system_activated(self):
+    def is_system_activated(self, be_gentle: bool = False):
+        if not self.public_key and be_gentle:
+            return True
+
         return self.is_license_key_valid(self.get_license_key())
