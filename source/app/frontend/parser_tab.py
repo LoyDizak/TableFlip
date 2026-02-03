@@ -37,7 +37,7 @@ class ParserTab:
         ttk.Label(table_idx_frame, text="Номер таблицы:").pack(side='left')
         self.table_index_var = tk.IntVar(value=0)
         table_index_entry = ttk.Entry(table_idx_frame, textvariable=self.table_index_var, width=6)
-        self.app.add_context_menu_to_widget(table_index_entry)
+        self.app.context_menu.add_to_widget(table_index_entry)
         table_index_entry.pack(side='left', padx=5)
         ttk.Button(table_idx_frame, text="Выбрать таблицу", command=self.on_button_load_table).pack(side='left', padx=5)
 
@@ -53,7 +53,7 @@ class ParserTab:
             column_index_var = tk.StringVar(value="")
             self.column_vars[key] = column_index_var
             entry = ttk.Entry(mapping_frame, textvariable=column_index_var, width=6)
-            self.app.add_context_menu_to_widget(entry)
+            self.app.context_menu.add_to_widget(entry)
             entry.grid(row=row, column=1, padx=3, pady=2)
 
         start_frame = ttk.Frame(left)
@@ -61,7 +61,7 @@ class ParserTab:
         ttk.Label(start_frame, text="Начать со строки:").pack(side='left')
         self.start_row_var = tk.IntVar(value=0)
         start_row_entry = ttk.Entry(start_frame, textvariable=self.start_row_var, width=6)
-        self.app.add_context_menu_to_widget(start_row_entry)
+        self.app.context_menu.add_to_widget(start_row_entry)
         start_row_entry.pack(side='left', padx=5)
 
         ttk.Button(left, text="Извлечь данные из таблицы", command=self.on_button_parse_table).pack(fill='x', pady=6)
@@ -73,7 +73,7 @@ class ParserTab:
         self.add_field_combo.pack(fill='x', padx=3, pady=3)
         self.add_value_var = tk.StringVar()
         add_value_entry = ttk.Entry(add_frame, textvariable=self.add_value_var)
-        self.app.add_context_menu_to_widget(add_value_entry)
+        self.app.context_menu.add_to_widget(add_value_entry)
         add_value_entry.pack(fill='x', padx=3, pady=3)
         ttk.Button(add_frame, text="Добавить ко всем", command=self.on_button_add_data_to_all).pack(fill='x', padx=3, pady=3)
 
@@ -90,7 +90,7 @@ class ParserTab:
         content.columnconfigure(0, weight=1)
 
         self.table_preview = tk.Text(content, height=12, wrap='none', state='normal')
-        self.app.add_context_menu_to_widget(self.table_preview )
+        self.app.context_menu.add_to_widget(self.table_preview )
         self.table_preview.grid(row=0, column=0, sticky='nsew')
 
         table_scroll = ttk.Scrollbar(content, orient='vertical', command=self.table_preview.yview)
@@ -105,7 +105,7 @@ class ParserTab:
         result_frame.pack(fill='both', expand=True, pady=3)
 
         self.result_preview = tk.Text(result_frame, height=12, state='normal')
-        self.app.add_context_menu_to_widget(self.result_preview)
+        self.app.context_menu.add_to_widget(self.result_preview)
         self.result_preview.pack(side='left', fill='both', expand=True)
         result_scroll = ttk.Scrollbar(result_frame, orient='vertical', command=self.result_preview.yview)
         result_scroll.pack(side='right', fill='y')

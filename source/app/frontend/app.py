@@ -34,11 +34,6 @@ class App(tk.Tk):
             self.activation_dialog.show()
 
 
-    def add_context_menu_to_widget(self, entry_widget):
-        """Добавить контекстное меню к виджету ввода"""
-        self.context_menu.add_to_widget(entry_widget)
-
-
     def check_license(self) -> bool:
         """Проверяет активацию лицензии"""
         if not self.license_system.is_system_activated(True):

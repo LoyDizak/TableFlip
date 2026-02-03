@@ -40,7 +40,7 @@ class AutofillTab:
         single_preview_frame = ttk.Frame(list_frame)
         single_preview_frame.pack(fill='both', expand=True, padx=3, pady=(3,6))
         self.current_person_preview = tk.Text(single_preview_frame, height=14, state='normal', wrap='none')
-        self.app.add_context_menu_to_widget(self.current_person_preview)
+        self.app.context_menu.add_to_widget(self.current_person_preview)
         scroll_horizontal = ttk.Scrollbar(single_preview_frame, orient='horizontal', command=self.current_person_preview.xview)
         self.current_person_preview.configure(xscrollcommand=scroll_horizontal.set)
         scroll_horizontal.pack(side='bottom', fill='x')
@@ -58,7 +58,7 @@ class AutofillTab:
         self.manual_index_var = tk.StringVar(value='0')
         ttk.Label(manual_frame, text="Номер:").pack(side='left')
         manual_index_entry = ttk.Entry(manual_frame, textvariable=self.manual_index_var, width=6)
-        self.app.add_context_menu_to_widget(manual_index_entry)
+        self.app.context_menu.add_to_widget(manual_index_entry)
         manual_index_entry.pack(side='left', padx=4)
         ttk.Button(manual_frame, text="Перейти", command=self.on_button_go_to_person_index).pack(side='left')
 
@@ -75,7 +75,7 @@ class AutofillTab:
         content_preview = ttk.Frame(preview_frame)
         content_preview.pack(fill='both', expand=True)
         self.autofill_preview = tk.Text(content_preview, state='normal', wrap='none')
-        self.app.add_context_menu_to_widget(self.autofill_preview)
+        self.app.context_menu.add_to_widget(self.autofill_preview)
         v_scroll = ttk.Scrollbar(content_preview, orient='vertical', command=self.autofill_preview.yview)
         self.autofill_preview.configure(yscrollcommand=v_scroll.set)
         v_scroll.pack(side='right', fill='y')
@@ -110,8 +110,8 @@ class AutofillTab:
 
         path = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")])
         if not path:
-            messagebox.showerror("Ошибка", "Вы указали неверный путь")
             return
+        
         try:
             persons = load_persons_from_json(path)
             self.persons = persons

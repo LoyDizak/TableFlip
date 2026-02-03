@@ -259,7 +259,7 @@ class LicenseSystem:
             return ""
     
     def is_system_activated(self, be_gentle: bool = False):
-        if not self.public_key and be_gentle:
+        if (not self.public_key) and be_gentle:
             return True
-
-        return self.is_license_key_valid(self.get_license_key())
+        key: str = self.get_license_key()
+        return self.is_license_key_valid(key)

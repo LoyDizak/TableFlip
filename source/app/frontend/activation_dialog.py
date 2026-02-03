@@ -7,7 +7,27 @@ class ActivationDialog:
     def __init__(self, parent: tk.Tk, license_system: LicenseSystem):
         self.parent: tk.Tk = parent
         self.license_system: LicenseSystem = license_system
+
         
+    def show(self):
+        self._create_window()
+        self.dialog.update_idletasks() 
+
+        screen_width = self.dialog.winfo_screenwidth()
+        screen_height = self.dialog.winfo_screenheight()
+
+        window_width = 420
+        window_height = 250
+
+        x = (screen_width - window_width)  // 2
+        y = (screen_height - window_height) // 2
+
+        self.dialog.geometry(f"+{x}+{y}")
+
+        self.parent.wait_window(self.dialog)
+
+
+    def _create_window(self):
         self.dialog: tk.Toplevel = tk.Toplevel(self.parent)
         self.dialog.title("Активация программы")
         self.dialog.geometry("420x250")
@@ -40,23 +60,6 @@ class ActivationDialog:
         btn_frame_open_key_file = tk.Frame(self.dialog)
         btn_frame_open_key_file.pack(padx=20, pady=(8, 15), fill="x")
         ttk.Button(btn_frame_open_key_file, text="Открыть файл с ключом", command=self._open_license_file).pack(anchor="center")
-
-        
-    def show(self):
-        self.dialog.update_idletasks() 
-
-        screen_width = self.dialog.winfo_screenwidth()
-        screen_height = self.dialog.winfo_screenheight()
-
-        window_width = 420
-        window_height = 250
-
-        x = (screen_width - window_width)  // 2
-        y = (screen_height - window_height) // 2
-
-        self.dialog.geometry(f"+{x}+{y}")
-
-        self.parent.wait_window(self.dialog)
 
 
     def _copy_hwid(self, hwid):
