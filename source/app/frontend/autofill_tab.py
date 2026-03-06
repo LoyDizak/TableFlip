@@ -28,7 +28,7 @@ class AutofillTab:
         right = ttk.Frame(self.autofill_tab)
         right.pack(side='left', fill='both', expand=True, padx=10, pady=10)
 
-        json_frame = ttk.LabelFrame(left, text="JSON")
+        json_frame = ttk.LabelFrame(left, text="Загрузка данных")
         json_frame.pack(fill='x', pady=5)
         ttk.Button(json_frame, text="Открыть файл", command=self.on_button_load_json).pack(side='left', padx=5, pady=5)
         self.current_json_label = ttk.Label(json_frame, text="Файл не выбран", wraplength=350)
@@ -55,7 +55,7 @@ class AutofillTab:
 
         manual_frame = ttk.Frame(list_frame)
         manual_frame.pack(fill='x', padx=3, pady=(2,4))
-        self.manual_index_var = tk.StringVar(value='0')
+        self.manual_index_var = tk.StringVar(value='1')
         ttk.Label(manual_frame, text="Номер:").pack(side='left')
         manual_index_entry = ttk.Entry(manual_frame, textvariable=self.manual_index_var, width=6)
         self.app.context_menu.add_to_widget(manual_index_entry)
@@ -94,7 +94,7 @@ class AutofillTab:
             self.current_person_preview.insert(tk.END, 'Нет данных')
         else:
             current_person = self.persons[self.current_person_index]
-            self.current_label.config(text=f"{self.current_person_index}/{len(self.persons)-1} — {current_person.full_name}")
+            self.current_label.config(text=f"{self.current_person_index + 1}/{len(self.persons)} — {current_person.full_name}")
             self.current_person_preview.insert(tk.END, person_to_string(current_person))
 
 
@@ -131,7 +131,7 @@ class AutofillTab:
             messagebox.showwarning("Внимание", "Сначала загрузите JSON с людьми")
             return
         try:
-            new_index = int(self.manual_index_var.get())
+            new_index = int(self.manual_index_var.get()) - 1
             self.change_current_person(new_index)
         except Exception:
             messagebox.showerror("Ошибка", "Неверный формат номера")

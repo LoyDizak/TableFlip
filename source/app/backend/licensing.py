@@ -162,24 +162,23 @@ class LicenseSystem:
             return False
 
 
-    # def get_license_info(self, license_key: str) -> dict:
-    #     """Получить информацию о лицензии"""
-    #     try:
-    #         decoded = base64.b64decode(license_key)
-    #         license_data = json.loads(decoded.decode())
+    def get_license_info(self, license_key: str) -> dict:
+        """Получить информацию о лицензии"""
+        try:
+            decoded = base64.b64decode(license_key)
+            license_data = json.loads(decoded.decode())
             
-    #         expire_date = datetime.fromisoformat(license_data["expire"])
-    #         issued_date = datetime.fromisoformat(license_data["issued"])
+            expire_date = datetime.fromisoformat(license_data["expire"])
+            issued_date = datetime.fromisoformat(license_data["issued"])
             
-    #         return {
-    #             "license_id": license_data["license_id"],
-    #             "issued": issued_date.date(),
-    #             "expire": expire_date.date(),
-    #             "days_left": (expire_date - datetime.now()).days,
-    #             "hwid_bound": bool(license_data.get("hwid"))
-    #         }
-    #     except:
-    #         raise
+            return {
+                "license_id": license_data["license_id"],
+                "issued": issued_date,
+                "expire": expire_date,
+                "hwid": bool(license_data.get("hwid"))
+            }
+        except:
+            raise
 
 
     def is_license_key_valid(self, license_key: str) -> bool:

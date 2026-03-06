@@ -5,7 +5,7 @@ import os
 from backend.data import TableLayout, PERSON_FIELDS_RUSSIAN_NAMES
 from backend.string_converter import matrix_to_string, persons_list_to_string
 from backend.parser import extract_docx_table, parse_table_data, add_data_to_persons_list
-from backend.json_handler import save_persons_to_json, load_persons_from_json
+from backend.json_handler import save_persons_to_json
 
 class ParserTab:
     def __init__(self, parent, app):
@@ -35,13 +35,13 @@ class ParserTab:
         table_idx_frame = ttk.Frame(left)
         table_idx_frame.pack(fill='x', pady=5)
         ttk.Label(table_idx_frame, text="Номер таблицы:").pack(side='left')
-        self.table_index_var = tk.IntVar(value=0)
+        self.table_index_var = tk.IntVar(value=1)
         table_index_entry = ttk.Entry(table_idx_frame, textvariable=self.table_index_var, width=6)
         self.app.context_menu.add_to_widget(table_index_entry)
         table_index_entry.pack(side='left', padx=5)
         ttk.Button(table_idx_frame, text="Выбрать таблицу", command=self.on_button_load_table).pack(side='left', padx=5)
 
-        mapping_frame = ttk.LabelFrame(left, text="Соответствие столбцов")
+        mapping_frame = ttk.LabelFrame(left, text="Соотнесение столбцов")
         mapping_frame.pack(fill='both', pady=5)
 
         self.column_vars = {}
@@ -59,7 +59,7 @@ class ParserTab:
         start_frame = ttk.Frame(left)
         start_frame.pack(fill='x', pady=5)
         ttk.Label(start_frame, text="Начать со строки:").pack(side='left')
-        self.start_row_var = tk.IntVar(value=0)
+        self.start_row_var = tk.IntVar(value=1)
         start_row_entry = ttk.Entry(start_frame, textvariable=self.start_row_var, width=6)
         self.app.context_menu.add_to_widget(start_row_entry)
         start_row_entry.pack(side='left', padx=5)
@@ -101,7 +101,7 @@ class ParserTab:
 
         self.table_preview.config(yscrollcommand=table_scroll.set, xscrollcommand=h_scroll.set)
 
-        result_frame = ttk.LabelFrame(right, text="Результат извлечения данных")
+        result_frame = ttk.LabelFrame(right, text="Результат извлечения")
         result_frame.pack(fill='both', expand=True, pady=3)
 
         self.result_preview = tk.Text(result_frame, height=12, state='normal')
@@ -125,11 +125,11 @@ class ParserTab:
         if self.table_data:
             cols = len(self.table_data[0])
 
-            header = [""] + [str(col) for col in range(cols)]
+            header = [""] + [str(col + 1) for col in range(cols)]
             formated_table_data.append(header)
 
             for i, row in enumerate(self.table_data):
-                formated_table_data.append([str(i)] + row)
+                formated_table_data.append([str(i + 1)] + row)
 
         preview_text = matrix_to_string(formated_table_data)
 
@@ -143,7 +143,7 @@ class ParserTab:
 
         path = filedialog.askopenfilename(filetypes=[("DOCX files", "*.docx")])
         if path:
-            self.table_index_var.set(0)
+            self.table_index_var.set(1)
             self.docx_path = path
             self.docx_label.config(text=os.path.basename(path))
             self.on_button_load_table()
@@ -158,7 +158,7 @@ class ParserTab:
         
         try:
             table_index = int(self.table_index_var.get())
-            self.table_data = extract_docx_table(self.docx_path, table_index)
+            self.table_data = extract_docx_table(self.docx_path, table_index - 1)
             self.update_table_preview()
         except Exception:
             messagebox.showerror("Ошибка", "Не удалось загрузить таблицу")
@@ -178,7 +178,7 @@ class ParserTab:
                 if column_index_var.get().isspace() or column_index_var.get() == "":
                     continue
 
-                column_index = int(column_index_var.get())
+                column_index = int(column_index_var.get()) - 1
 
                 if column_index < 0 or column_index >= len(self.table_data[0]):
                     messagebox.showerror("Ошибка", "Номер столбца выходит за рамки таблицы")
@@ -190,7 +190,7 @@ class ParserTab:
             return
 
         try:
-            start_row = self.start_row_var.get()
+            start_row = self.start_row_var.get() - 1
             self.persons_list = parse_table_data(self.table_data, layout, start_row)
             out = persons_list_to_string(self.persons_list)
             self.result_preview.delete(1.0, tk.END)

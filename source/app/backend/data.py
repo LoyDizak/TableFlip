@@ -35,7 +35,7 @@ class TableLayout:
 
 APP_NAME: str = "DOCX Analyze II" # Менять этот параметр только если прям очень хочется, но лучше не надо
 APP_DATA_FOLDER: str = f"{os.environ.get("APPDATA", "")}\\{APP_NAME}\\"
-PUBLIC_KEY: str = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxNWoYNETy4I7W1VoMuOZir7KE6ygbvNajvK+pIxUK7MnvSbwUuXddoah1tPJHpR4gSlaZlg84yKrJOnumRSTDSByyPy7EjXJMsQbDGx8Ze+3hhfGAPOR0H+fvsotn6KgfW6HwsWYwPYn8HYUxllPz4/8R3tGmXicaULJgeBllwyKMCcljYKFEAZTNhu+WQTunUXZTfbCGkaN6airczfFf8EGV3Rw78TnCHmuE2WYRs8ndpgcnotOyGOU4FA61oeyF6wRisqXeJhyvwuXnULbOnECgHpgifvm7gEEtZAzk4uli23VRW8991oo0XyIBnahWLv+CohFcQSPuaScoMPpeQIDAQAB"
+PUBLIC_KEY: str = "" #"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxNWoYNETy4I7W1VoMuOZir7KE6ygbvNajvK+pIxUK7MnvSbwUuXddoah1tPJHpR4gSlaZlg84yKrJOnumRSTDSByyPy7EjXJMsQbDGx8Ze+3hhfGAPOR0H+fvsotn6KgfW6HwsWYwPYn8HYUxllPz4/8R3tGmXicaULJgeBllwyKMCcljYKFEAZTNhu+WQTunUXZTfbCGkaN6airczfFf8EGV3Rw78TnCHmuE2WYRs8ndpgcnotOyGOU4FA61oeyF6wRisqXeJhyvwuXnULbOnECgHpgifvm7gEEtZAzk4uli23VRW8991oo0XyIBnahWLv+CohFcQSPuaScoMPpeQIDAQAB"
 
 # Соотнесение навзаний полей класса Person и их русских названий
 PERSON_FIELDS_RUSSIAN_NAMES: dict = {
