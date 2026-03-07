@@ -16,12 +16,6 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-# @dataclass
-# class LicenseInfo:
-#     license_id: str
-#     issued: datetime
-#     expiring: datetime 
-#     hwid: str
 
 class LicenseSystem:
     """Система проверки лицензий"""

@@ -1,8 +1,10 @@
 from backend.data import Person
+import shutil
+import textwrap
+
 
 def matrix_to_string(table, max_width=None, padding=1):
-    import shutil
-    import textwrap
+
     """
     Принимает двумерный список (таблица) и возвращает
     аккуратно форматированное строковое представление таблицы
@@ -73,9 +75,31 @@ def person_to_string(person: Person) -> str:
     return "\n".join(lines)
 
 
+def person_to_string_new(person: dict) -> str:
+    """
+    Возвращает личную информацию из объекта Person
+    в аккуратно отформатированном виде.
+    """
+
+    lines = []
+
+    for field in person.values():
+        lines.append(f"{field["name"]:<25}: {field["value"] or '[-]'}")
+
+    return "\n".join(lines)
+
+
 def persons_list_to_string(persons: list[Person]) -> str:
     all_persons = ""
     for person in persons:
         all_persons += person_to_string(person)
+        all_persons  += "\n\n"
+    return all_persons
+
+
+def persons_list_to_string_new(persons: list[dict]) -> str:
+    all_persons = ""
+    for person in persons:
+        all_persons += person_to_string_new(person)
         all_persons  += "\n\n"
     return all_persons

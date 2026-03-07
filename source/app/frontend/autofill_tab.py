@@ -4,7 +4,7 @@ import threading
 import os
 
 import backend.web as web
-from backend.json_handler import load_persons_from_json
+from backend.json_handling import load_persons_from_json
 from backend.string_converter import persons_list_to_string, person_to_string
 
 

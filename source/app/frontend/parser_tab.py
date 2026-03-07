@@ -4,8 +4,8 @@ import os
 
 from backend.data import TableLayout, PERSON_FIELDS_RUSSIAN_NAMES
 from backend.string_converter import matrix_to_string, persons_list_to_string
-from backend.parser import extract_docx_table, parse_table_data, add_data_to_persons_list
-from backend.json_handler import save_persons_to_json
+from backend.parsing import extract_docx_table, parse_table_data, add_data_to_persons_list
+from backend.json_handling import save_persons_to_json
 
 class ParserTab:
     def __init__(self, parent, app):

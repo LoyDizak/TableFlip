@@ -33,9 +33,9 @@ class TableLayout:
     knowledge_check_date: int = -1               # Дата проверки знаний
     protocol_number: int = -1                    # Номер протокола проверки знания
 
-APP_NAME: str = "DOCX Analyze II" # Менять этот параметр только если прям очень хочется, но лучше не надо
+APP_NAME: str = "TableFlip" # Менять этот параметр только если прям очень хочется, но лучше не надо
 APP_DATA_FOLDER: str = f"{os.environ.get("APPDATA", "")}\\{APP_NAME}\\"
-PUBLIC_KEY: str = "" #"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxNWoYNETy4I7W1VoMuOZir7KE6ygbvNajvK+pIxUK7MnvSbwUuXddoah1tPJHpR4gSlaZlg84yKrJOnumRSTDSByyPy7EjXJMsQbDGx8Ze+3hhfGAPOR0H+fvsotn6KgfW6HwsWYwPYn8HYUxllPz4/8R3tGmXicaULJgeBllwyKMCcljYKFEAZTNhu+WQTunUXZTfbCGkaN6airczfFf8EGV3Rw78TnCHmuE2WYRs8ndpgcnotOyGOU4FA61oeyF6wRisqXeJhyvwuXnULbOnECgHpgifvm7gEEtZAzk4uli23VRW8991oo0XyIBnahWLv+CohFcQSPuaScoMPpeQIDAQAB"
+PUBLIC_KEY: str = ""
 
 # Соотнесение навзаний полей класса Person и их русских названий
 PERSON_FIELDS_RUSSIAN_NAMES: dict = {
@@ -66,13 +66,31 @@ PERSON_FIELDS_WEB_MAP: dict = {
     'workplace_inn': 'EmployerInn',
     'training_program': 'LearnProgramIds', # 'LearnProgramId' 'LearnProgram'
     'training_org': 'OrganizationTitle',
-    # NOTE: HTML uses the same name/id for organization title and its INN in this local copy;
-    # include both candidates so the function can find the available element.
     'training_org_inn': 'OrganizationTitle',
     'knowledge_result': 'IsPassed',
     'knowledge_check_date': 'TestDate',
     'protocol_number': 'ProtocolNumber',
 }
+
+
+DEFAULT_PERSON_TEMPLATE: dict = {
+    "full_name" :               {"table_index": -1, "value": "", "name": "ФИО",                       "web_id": ""},
+    "second_name" :             {"table_index": -1, "value": "", "name": "фамилия",                   "web_id": "LastName"},
+    'first_name' :              {"table_index": -1, "value": "", "name": "Имя",                       "web_id": "FirstName"},
+    'middle_name' :             {"table_index": -1, "value": "", "name": "Отчество",                  "web_id": "MiddleName"},
+    'snils' :                   {"table_index": -1, "value": "", "name": "СНИЛС",                     "web_id": "SnilsTextBoxId"},
+    'position' :                {"table_index": -1, "value": "", "name": "Профессия (должность)",     "web_id": "Position"},
+    'workplace' :               {"table_index": -1, "value": "", "name": "Место работы",              "web_id": "EmployerTitle"},
+    'workplace_inn' :           {"table_index": -1, "value": "", "name": "ИНН работодателя",          "web_id": "EmployerInn"},
+    'training_program' :        {"table_index": -1, "value": "", "name": "Программа обучения",        "web_id": "LearnProgramIds"}, # 'LearnProgramId' 'LearnProgram'
+    'training_org' :            {"table_index": -1, "value": "", "name": "Организация обучения",      "web_id": "OrganizationTitle"},
+    'training_org_inn' :        {"table_index": -1, "value": "", "name": "ИНН организации обучения",  "web_id": "OrganizationTitle"},
+    'knowledge_check_result' :  {"table_index": -1, "value": "", "name": "Результат проверки знаний", "web_id": "IsPassed"},
+    'knowledge_check_date' :    {"table_index": -1, "value": "", "name": "Дата проверки знаний",      "web_id": "TestDate"},
+    'protocol_number' :         {"table_index": -1, "value": "", "name": "Номер протокола",           "web_id": "ProtocolNumber"},
+}
+
+
 CHROME_BINARY_LOCATION: str = "chrome\\chrome-win64\\chrome.exe"
 CHROME_DRIVER_LOCATION: str = "chrome\\chromedriver-win64\\chromedriver.exe"
 CHROME_PROFILE_LOCATION: str = APP_DATA_FOLDER + "chrome profile"
