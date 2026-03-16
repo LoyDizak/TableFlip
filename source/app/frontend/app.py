@@ -1,20 +1,19 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from backend.data import APP_NAME, PUBLIC_KEY
-from backend.licensing import LicenseSystem
-
 from frontend.parser_tab import ParserTab
 from frontend.autofill_tab import AutofillTab
 from frontend.activation_dialog import ActivationDialog
 from frontend.context_menu import ContextMenu
 
+from backend.data import APP_NAME, PUBLIC_KEY
+from backend.licensing import LicenseSystem
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title(APP_NAME + "   |   Автор: Артём Всяких")
-        self.geometry("1200x670")
+        self.geometry("1220x670")
 
         self.license_system = LicenseSystem(APP_NAME, PUBLIC_KEY)
         self.context_menu = ContextMenu(self)

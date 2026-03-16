@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 set "ENTRY_POINT=source\app\main.py"
-set "APP_NAME=DOCX Analyze II"
+set "APP_NAME=TableFlip"
 set "TARGET_DIR=builds"
 set "BUILD_NAME=%APP_NAME%.exe"
 

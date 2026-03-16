@@ -3,8 +3,7 @@ import shutil
 import textwrap
 
 
-def matrix_to_string(table, max_width=None, padding=1):
-
+def matrix_to_string(table, max_width=120, padding=1):
     """
     Принимает двумерный список (таблица) и возвращает
     аккуратно форматированное строковое представление таблицы
@@ -13,9 +12,6 @@ def matrix_to_string(table, max_width=None, padding=1):
 
     if not table or not any(table):
         return "Пустая таблица"
-
-    if max_width is None:
-        max_width = shutil.get_terminal_size(fallback=(80, 20)).columns
 
     columns = len(table[0])
     usable_width = max_width - (columns + 1)

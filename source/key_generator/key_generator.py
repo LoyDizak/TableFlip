@@ -6,6 +6,7 @@
 import os
 import json
 import base64
+import uuid
 from datetime import datetime
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
@@ -99,7 +100,6 @@ class KeyGenerator:
         
         # Генерируем ID если не указан
         if not license_id:
-            import uuid
             license_id = str(uuid.uuid4())
         
         # Данные лицензии

@@ -30,7 +30,6 @@ def find_button(driver: webdriver.Chrome, button_value: str) -> WebElement:
     try:
         return driver.find_element(By.XPATH, f"//input[@value='{button_value}']")
     except:
-        print(f"Не послучилось найти кнопку \"{button_value}\"")
         raise
 
 def set_input_field_value(driver: webdriver.Chrome, input_field: WebElement, value) -> None:
@@ -42,7 +41,7 @@ def set_input_field_value(driver: webdriver.Chrome, input_field: WebElement, val
         # Try to select by value first
         try:
             select.select_by_value(str(value))
-        except Exception:
+        except:
             print(f"Could not find value \"{value}\" in select options of {input_field.tag_name}")
 
 
