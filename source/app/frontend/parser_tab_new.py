@@ -2,19 +2,20 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import os
 
-from backend.data import TableLayout, PERSON_FIELDS_RUSSIAN_NAMES
-from backend.string_converter import matrix_to_string, persons_list_to_string
-from backend.parsing import extract_docx_table, parse_table_data, add_data_to_persons_list
-from backend.json_handling import save_persons
+from backend.data import DEFAULT_PERSON_TEMPLATE
+from backend.string_converter import matrix_to_string, persons_list_to_string_new
+from backend.parsing import extract_docx_table, parse_table_data_new, add_data_to_persons_list_new
+from backend.json_handling import save_persons_new
 
 class ParserTab:
     def __init__(self, parent, app):
         self.app = app
         self.main_tab = ttk.Frame(parent)
         
-        self.docx_path = ""
-        self.table_data = []
-        self.persons_list = []
+        self.docx_path: str = ""
+        self.table_data: list[list[str]] = []
+        self.persons_list: list = []
+        self.template: dict[str, dict] = DEFAULT_PERSON_TEMPLATE
         
         self.create_parser_tab()
     
@@ -45,16 +46,22 @@ class ParserTab:
         mapping_frame.pack(fill='both', pady=5)
 
         self.column_vars = {}
-        mapping_keys = [k for k in PERSON_FIELDS_RUSSIAN_NAMES.keys() if k not in ("last_name", "first_name", "middle_name")]
-        for row, key in enumerate(mapping_keys):
-            label_text = PERSON_FIELDS_RUSSIAN_NAMES[key]
-            lbl = ttk.Label(mapping_frame, text=label_text)
-            lbl.grid(row=row, column=0, sticky='w', padx=3, pady=2)
+        row_index: int = 0
+        for field, mapping in self.template.items():
+            if not mapping["show_in_ui"]:
+                continue
+            
+            label = ttk.Label(mapping_frame, text=mapping["display_name"])
+            label.grid(row=row_index, column=0, sticky='w', padx=3, pady=2)
+            
             column_index_var = tk.StringVar(value="")
-            self.column_vars[key] = column_index_var
+            self.column_vars[field] = column_index_var
             entry = ttk.Entry(mapping_frame, textvariable=column_index_var, width=6)
             self.app.context_menu.add_to_widget(entry)
-            entry.grid(row=row, column=1, padx=3, pady=2)
+            entry.grid(row=row_index, column=1, padx=3, pady=2)
+
+            row_index += 1
+
 
         start_frame = ttk.Frame(left)
         start_frame.pack(fill='x', pady=5)
@@ -66,16 +73,17 @@ class ParserTab:
 
         ttk.Button(left, text="Извлечь данные из таблицы", command=self.on_button_parse_table).pack(fill='x', pady=6)
 
-        add_frame = ttk.LabelFrame(left, text="Добавить значение ко всем")
-        add_frame.pack(fill='x', pady=5)
+        add_to_all_frame = ttk.LabelFrame(left, text="Добавить значение ко всем")
+        add_to_all_frame.pack(fill='x', pady=5)
         self.add_field_var = tk.StringVar()
-        self.add_field_combo = ttk.Combobox(add_frame, textvariable=self.add_field_var, state='readonly', values=list(PERSON_FIELDS_RUSSIAN_NAMES.values()))
-        self.add_field_combo.pack(fill='x', padx=3, pady=3)
+        display_field_names: list[str] = [mapping["display_name"] for mapping in self.template.values()]
+        self.add_to_all_combobox = ttk.Combobox(add_to_all_frame, textvariable=self.add_field_var, state='readonly', values=display_field_names)
+        self.add_to_all_combobox.pack(fill='x', padx=3, pady=3)
         self.add_value_var = tk.StringVar()
-        add_value_entry = ttk.Entry(add_frame, textvariable=self.add_value_var)
-        self.app.context_menu.add_to_widget(add_value_entry)
-        add_value_entry.pack(fill='x', padx=3, pady=3)
-        ttk.Button(add_frame, text="Добавить ко всем", command=self.on_button_add_data_to_all).pack(fill='x', padx=3, pady=3)
+        add_to_all_value_entry = ttk.Entry(add_to_all_frame, textvariable=self.add_value_var)
+        self.app.context_menu.add_to_widget(add_to_all_value_entry)
+        add_to_all_value_entry.pack(fill='x', padx=3, pady=3)
+        ttk.Button(add_to_all_frame, text="Добавить ко всем", command=self.on_button_add_data_to_all).pack(fill='x', padx=3, pady=3)
 
         save_frame = ttk.Frame(left)
         save_frame.pack(fill='x', pady=5)
@@ -172,30 +180,27 @@ class ParserTab:
             messagebox.showwarning("Внимание", "Сначала загрузите таблицу")
             return
         
-        try:
-            layout = TableLayout()
-            for key, column_index_var in self.column_vars.items():
-                if column_index_var.get().isspace() or column_index_var.get() == "":
-                    continue
 
+        # Update template column indices 
+        for field, column_index_var in self.column_vars.items():
+            try:
                 column_index = int(column_index_var.get()) - 1
+            except: 
+                continue
 
-                if column_index < 0 or column_index >= len(self.table_data[0]):
-                    messagebox.showerror("Ошибка", "Номер столбца выходит за рамки таблицы")
-                    return
+            if column_index < 0 or column_index >= len(self.table_data[0]):
+                messagebox.showerror("Ошибка", "Номер столбца выходит за рамки таблицы")
+                return
+            self.template[field]["column_index"] = column_index
 
-                setattr(layout, key, column_index)
-        except Exception:
-            messagebox.showerror("Ошибка", "Неверно указан номер столбца")
-            return
-
+        # Extract data from table
         try:
             start_row = self.start_row_var.get() - 1
-            self.persons_list = parse_table_data(self.table_data, layout, start_row)
-            out = persons_list_to_string(self.persons_list)
+            self.persons_list = parse_table_data_new(self.table_data, self.template, start_row)
+            persons_preview = persons_list_to_string_new(self.persons_list, self.template)
             self.result_preview.delete(1.0, tk.END)
-            self.result_preview.insert(tk.END, out)
-        except Exception:
+            self.result_preview.insert(tk.END, persons_preview)
+        except:
             messagebox.showerror("Ошибка", "Не удалось извлечь данные из таблицы")
 
 
@@ -209,21 +214,18 @@ class ParserTab:
         
         russian_field = self.add_field_var.get()
         value = self.add_value_var.get()
-        
-        field_name = None
-        for eng_key, rus_val in PERSON_FIELDS_RUSSIAN_NAMES.items():
-            if rus_val == russian_field:
-                field_name = eng_key
-                break
+
+        display_name_map = {mapping["display_name"]: field for field, mapping in self.template.items()}
+        field_name = display_name_map[russian_field]
         
         if not field_name:
-            messagebox.showerror("Ошибка", "Неизвестное поле")
+            messagebox.showerror("Ошибка", "Не удалось найти данное поле. Этого не должно было произойти, обратитесь к разработчику программы")
             return
         
         try:
-            add_data_to_persons_list(self.persons_list, field_name, value)
+            add_data_to_persons_list_new(self.persons_list, field_name, value)
             self.result_preview.delete(1.0, tk.END)
-            self.result_preview.insert(tk.END, persons_list_to_string(self.persons_list))
+            self.result_preview.insert(tk.END, persons_list_to_string_new(self.persons_list, self.template))
         except Exception:
             messagebox.showerror("Ошибка", "Не удалось добавить данные")
 
@@ -239,7 +241,7 @@ class ParserTab:
         if not path:
             return
         try:
-            save_persons(path, self.persons_list)
+            save_persons_new(path, self.persons_list)
         except Exception:
             messagebox.showerror("Ошибка", "Не удалось сохранить файл")
 

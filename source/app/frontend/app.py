@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from frontend.parser_tab import ParserTab
+from frontend.parser_tab_new import ParserTab
 from frontend.autofill_tab import AutofillTab
 from frontend.activation_dialog import ActivationDialog
 from frontend.context_menu import ContextMenu

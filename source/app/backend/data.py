@@ -74,20 +74,21 @@ PERSON_FIELDS_WEB_MAP: dict = {
 
 
 DEFAULT_PERSON_TEMPLATE: dict = {
-    "full_name" :               {"table_index": -1, "value": "", "name": "ФИО",                       "web_id": ""},
-    "second_name" :             {"table_index": -1, "value": "", "name": "фамилия",                   "web_id": "LastName"},
-    'first_name' :              {"table_index": -1, "value": "", "name": "Имя",                       "web_id": "FirstName"},
-    'middle_name' :             {"table_index": -1, "value": "", "name": "Отчество",                  "web_id": "MiddleName"},
-    'snils' :                   {"table_index": -1, "value": "", "name": "СНИЛС",                     "web_id": "SnilsTextBoxId"},
-    'position' :                {"table_index": -1, "value": "", "name": "Профессия (должность)",     "web_id": "Position"},
-    'workplace' :               {"table_index": -1, "value": "", "name": "Место работы",              "web_id": "EmployerTitle"},
-    'workplace_inn' :           {"table_index": -1, "value": "", "name": "ИНН работодателя",          "web_id": "EmployerInn"},
-    'training_program' :        {"table_index": -1, "value": "", "name": "Программа обучения",        "web_id": "LearnProgramIds"}, # 'LearnProgramId' 'LearnProgram'
-    'training_org' :            {"table_index": -1, "value": "", "name": "Организация обучения",      "web_id": "OrganizationTitle"},
-    'training_org_inn' :        {"table_index": -1, "value": "", "name": "ИНН организации обучения",  "web_id": "OrganizationTitle"},
-    'knowledge_check_result' :  {"table_index": -1, "value": "", "name": "Результат проверки знаний", "web_id": "IsPassed"},
-    'knowledge_check_date' :    {"table_index": -1, "value": "", "name": "Дата проверки знаний",      "web_id": "TestDate"},
-    'protocol_number' :         {"table_index": -1, "value": "", "name": "Номер протокола",           "web_id": "ProtocolNumber"},
+    # Полное имя обязано назыаться "full_name", иначе разделение полного имени на составляющие не будет работать
+    "full_name" :               {"show_in_ui": True, "column_index": -1, "display_name": "ФИО",                       "web_id": ""},
+    "last_name" :               {"show_in_ui": False, "column_index": -1, "display_name": "фамилия",                   "web_id": "LastName"},
+    'first_name' :              {"show_in_ui": False, "column_index": -1, "display_name": "Имя",                       "web_id": "FirstName"},
+    'middle_name' :             {"show_in_ui": False, "column_index": -1, "display_name": "Отчество",                  "web_id": "MiddleName"},
+    'snils' :                   {"show_in_ui": True, "column_index": -1, "display_name": "СНИЛС",                     "web_id": "SnilsTextBoxId"},
+    'position' :                {"show_in_ui": True, "column_index": -1, "display_name": "Профессия (должность)",     "web_id": "Position"},
+    'workplace' :               {"show_in_ui": True, "column_index": -1, "display_name": "Место работы",              "web_id": "EmployerTitle"},
+    'workplace_inn' :           {"show_in_ui": True, "column_index": -1, "display_name": "ИНН работодателя",          "web_id": "EmployerInn"},
+    'training_program' :        {"show_in_ui": True, "column_index": -1, "display_name": "Программа обучения",        "web_id": "LearnProgramIds"}, # 'LearnProgramId' 'LearnProgram'
+    'training_org' :            {"show_in_ui": True, "column_index": -1, "display_name": "Организация обучения",      "web_id": "OrganizationTitle"},
+    'training_org_inn' :        {"show_in_ui": True, "column_index": -1, "display_name": "ИНН организации обучения",  "web_id": "OrganizationTitle"},
+    'knowledge_result' :        {"show_in_ui": True, "column_index": -1, "display_name": "Результат проверки знаний", "web_id": "IsPassed"},
+    'knowledge_check_date' :    {"show_in_ui": True, "column_index": -1, "display_name": "Дата проверки знаний",      "web_id": "TestDate"},
+    'protocol_number' :         {"show_in_ui": True, "column_index": -1, "display_name": "Номер протокола",           "web_id": "ProtocolNumber"},
 }
 
 

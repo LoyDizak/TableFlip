@@ -72,6 +72,14 @@ def fill_person_form(driver: webdriver.Chrome, person: Person) -> None:
         set_input_field_value(driver, input_field, input_value)
 
 
+def fill_person_form_new(driver: webdriver.Chrome, person: dict, template: dict) -> None:
+    switch_to_active_window(driver)
+    for field, mapping in template.items():
+        input_field: WebElement = find_input_field(driver, mapping["web_id"])
+        input_value: str = person[field]
+        set_input_field_value(driver, input_field, input_value)
+
+
 def confirm_entry(driver: webdriver.Chrome) -> None:
     switch_to_active_window(driver)
     btn = find_button(driver, "Сохранить")

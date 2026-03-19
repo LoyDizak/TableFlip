@@ -71,7 +71,7 @@ def person_to_string(person: Person) -> str:
     return "\n".join(lines)
 
 
-def person_to_string_new(person: dict) -> str:
+def person_to_string_new(person: dict[str, str], template: dict[str, dict]) -> str:
     """
     Возвращает личную информацию из объекта Person
     в аккуратно отформатированном виде.
@@ -79,8 +79,8 @@ def person_to_string_new(person: dict) -> str:
 
     lines = []
 
-    for field in person.values():
-        lines.append(f"{field["name"]:<25}: {field["value"] or '[-]'}")
+    for field, mapping in template.items():
+        lines.append(f"{mapping["display_name"]:<25}: {person[field] or '[-]'}")
 
     return "\n".join(lines)
 
@@ -93,9 +93,9 @@ def persons_list_to_string(persons: list[Person]) -> str:
     return all_persons
 
 
-def persons_list_to_string_new(persons: list[dict]) -> str:
+def persons_list_to_string_new(persons: list[dict[str, str]], template: dict[str, dict]) -> str:
     all_persons = ""
     for person in persons:
-        all_persons += person_to_string_new(person)
+        all_persons += person_to_string_new(person, template)
         all_persons  += "\n\n"
     return all_persons

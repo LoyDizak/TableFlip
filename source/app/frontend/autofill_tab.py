@@ -4,7 +4,7 @@ import threading
 import os
 
 import backend.web as web
-from backend.json_handling import load_persons_from_json
+from backend.json_handling import load_persons
 from backend.string_converter import persons_list_to_string, person_to_string
 
 
@@ -113,13 +113,12 @@ class AutofillTab:
             return
         
         try:
-            persons = load_persons_from_json(path)
-            self.persons = persons
+            self.persons = load_persons(path)
             self.current_json_label.config(text=os.path.basename(path))
             self.current_person_index = 0
             self.update_current_person_preview()
             self.update_json_preview()
-        except Exception as e:
+        except:
             messagebox.showerror("Ошибка", "Не удалось загрузить файл")
 
 
