@@ -1,7 +1,4 @@
 import json
-from dataclasses import asdict
-
-from backend.data import Person
 
 def save_to_json(file_path: str, data) -> None:
     with open(file_path, "w", encoding="utf-8") as file:
@@ -11,32 +8,3 @@ def save_to_json(file_path: str, data) -> None:
 def load_from_json(file_path: str):
     with open(file_path, "r", encoding="utf-8") as f:
         return json.load(f)
-
-def save_persons(file_path: str, persons: list[Person]) -> None:
-    data = [asdict(person) for person in persons]
-
-    save_to_json(file_path, data)
-
-
-def save_persons_new(file_path: str, persons: list[dict]) -> None:
-    save_to_json(file_path, persons)
-
-
-def load_persons(file_path: str) -> list[Person]:
-    with open(file_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-
-    persons = []
-    for item in data:
-        person = Person(**item)
-        persons.append(person)
-
-    return persons
-
-
-def load_persons_new(file_path: str) -> list[dict[str, str]]:
-    with open(file_path, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-# def load_template(file_path: str) -> dict[str, dict]:
-#     pass

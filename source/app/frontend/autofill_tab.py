@@ -3,9 +3,9 @@ from tkinter import ttk, filedialog, messagebox
 import threading
 import os
 
-import backend.web as web
-from backend.json_handling import load_persons
-from backend.string_converter import persons_list_to_string, person_to_string
+from backend.web import open_browser, confirm_entry, fill_person_form
+from backend.json_handling import load_from_json
+from backend.to_string import persons_list_to_string, person_to_string
 
 
 class AutofillTab:
@@ -13,7 +13,8 @@ class AutofillTab:
         self.app = app
         self.autofill_tab = ttk.Frame(parent)
         
-        self.persons: list = []
+        self.persons: list[dict[str, str]] = []
+        self.template: dict[str, dict]
         self.current_person_index: int = 0
         self.web_driver = None
         
@@ -84,7 +85,7 @@ class AutofillTab:
     
     def update_json_preview(self):
         self.autofill_preview.delete(1.0, tk.END)
-        self.autofill_preview.insert(tk.END, persons_list_to_string(self.persons))
+        self.autofill_preview.insert(tk.END, persons_list_to_string(self.persons, self.template))
 
 
     def update_current_person_preview(self):
@@ -94,8 +95,8 @@ class AutofillTab:
             self.current_person_preview.insert(tk.END, 'Нет данных')
         else:
             current_person = self.persons[self.current_person_index]
-            self.current_label.config(text=f"{self.current_person_index + 1}/{len(self.persons)} — {current_person.full_name}")
-            self.current_person_preview.insert(tk.END, person_to_string(current_person))
+            self.current_label.config(text=f"{self.current_person_index + 1}/{len(self.persons)} — {current_person["full_name"]}")
+            self.current_person_preview.insert(tk.END, person_to_string(current_person, self.template))
 
 
     def change_current_person(self, new_index:int):
@@ -113,7 +114,9 @@ class AutofillTab:
             return
         
         try:
-            self.persons = load_persons(path)
+            data = load_from_json(path)
+            self.template = data["template"]
+            self.persons = data["data"]
             self.current_json_label.config(text=os.path.basename(path))
             self.current_person_index = 0
             self.update_current_person_preview()
@@ -144,7 +147,7 @@ class AutofillTab:
         if self.web_driver:
             self.web_driver.quit()
         try:
-            thread = threading.Thread(target = web.open_browser, daemon = True)
+            thread = threading.Thread(target=lambda: setattr(self, 'web_driver', open_browser()), daemon=True)
             thread.start()
         except Exception:
             messagebox.showerror("Ошибка", "Не удалось открыть страницу браузера")
@@ -161,7 +164,7 @@ class AutofillTab:
             messagebox.showwarning("Внимание", "Сначала откройте файл с данными")
             return
         try:
-            web.fill_person_form(self.web_driver, self.persons[self.current_person_index])
+            fill_person_form(self.web_driver, self.persons[self.current_person_index], self.template)
         except Exception:
             messagebox.showerror("Ошибка", "Не удалось заполнить данные")
 
@@ -174,7 +177,7 @@ class AutofillTab:
             messagebox.showwarning("Внимание", "Сначала откройте страницу")
             return
         try:
-            web.confirm_entry(self.web_driver)
+            confirm_entry(self.web_driver)
         except Exception:
             messagebox.showerror("Ошибка", "Не удалось найти кнопку подтверждения")
 

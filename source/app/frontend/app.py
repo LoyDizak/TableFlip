@@ -1,12 +1,12 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from frontend.parser_tab_new import ParserTab
-from frontend.autofill_tab_new import AutofillTab
+from frontend.parser_tab import ParserTab
+from frontend.autofill_tab import AutofillTab
 from frontend.activation_dialog import ActivationDialog
 from frontend.context_menu import ContextMenu
 
-from backend.data import APP_NAME, PUBLIC_KEY
+from backend.constants import APP_NAME, PUBLIC_KEY
 from backend.licensing import LicenseSystem
 
 class App(tk.Tk):

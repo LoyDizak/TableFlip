@@ -6,7 +6,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import Select
 import os
 
-from backend.data import Person, PERSON_FIELDS_WEB_MAP, CHROME_BINARY_LOCATION, CHROME_DRIVER_LOCATION, CHROME_BOOT_ARGUMENTS, CHROME_PROFILE_LOCATION
+from backend.constants import CHROME_BINARY_LOCATION, CHROME_DRIVER_LOCATION, CHROME_BOOT_ARGUMENTS, CHROME_PROFILE_LOCATION
 
 
 def switch_to_active_window(driver: webdriver.Chrome) -> None:
@@ -64,20 +64,12 @@ def open_browser() -> webdriver.Chrome:
     return driver
 
 
-def fill_person_form(driver: webdriver.Chrome, person: Person) -> None:
-    switch_to_active_window(driver)
-    for field_name, field_id in PERSON_FIELDS_WEB_MAP.items():
-        input_field: WebElement = find_input_field(driver, field_id)
-        input_value: str = getattr(person, field_name)
-        set_input_field_value(driver, input_field, input_value)
-
-
-def fill_person_form_new(driver: webdriver.Chrome, person: dict[str, str], template: dict[str, dict]) -> None:
+def fill_person_form(driver: webdriver.Chrome, person: dict[str, str], template: dict[str, dict]) -> None:
     switch_to_active_window(driver)
     for field, mapping in template.items():
         if mapping["web_id"] == "":
             continue
-        
+
         input_field: WebElement = find_input_field(driver, mapping["web_id"])
         input_value: str = person[field]
         set_input_field_value(driver, input_field, input_value)
