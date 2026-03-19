@@ -5,7 +5,7 @@ import os
 from backend.data import DEFAULT_PERSON_TEMPLATE
 from backend.string_converter import matrix_to_string, persons_list_to_string_new
 from backend.parsing import extract_docx_table, parse_table_data_new, add_data_to_persons_list_new
-from backend.json_handling import save_persons_new
+from backend.json_handling import save_to_json
 
 class ParserTab:
     def __init__(self, parent, app):
@@ -241,7 +241,7 @@ class ParserTab:
         if not path:
             return
         try:
-            save_persons_new(path, self.persons_list)
+            save_to_json(path, {"template": self.template, "data": self.persons_list})
         except Exception:
             messagebox.showerror("Ошибка", "Не удалось сохранить файл")
 

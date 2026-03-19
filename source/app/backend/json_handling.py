@@ -8,6 +8,10 @@ def save_to_json(file_path: str, data) -> None:
         json.dump(data, file, ensure_ascii=False, indent=2)
 
 
+def load_from_json(file_path: str):
+    with open(file_path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
 def save_persons(file_path: str, persons: list[Person]) -> None:
     data = [asdict(person) for person in persons]
 
@@ -28,6 +32,11 @@ def load_persons(file_path: str) -> list[Person]:
         persons.append(person)
 
     return persons
+
+
+def load_persons_new(file_path: str) -> list[dict[str, str]]:
+    with open(file_path, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 # def load_template(file_path: str) -> dict[str, dict]:
 #     pass

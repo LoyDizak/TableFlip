@@ -50,7 +50,7 @@ PERSON_FIELDS_RUSSIAN_NAMES: dict = {
     "training_program": "Программа обучения",
     "training_org": "Организация обучения",
     "training_org_inn": "ИНН организации обучения",
-    "knowledge_result": "Результат проверки знаний",
+    "knowledge_check_result": "Результат проверки знаний",
     "knowledge_check_date": "Дата проверки знаний",
     "protocol_number": "Номер протокола",
 }
@@ -84,8 +84,8 @@ DEFAULT_PERSON_TEMPLATE: dict = {
     'workplace' :               {"show_in_ui": True, "column_index": -1, "display_name": "Место работы",              "web_id": "EmployerTitle"},
     'workplace_inn' :           {"show_in_ui": True, "column_index": -1, "display_name": "ИНН работодателя",          "web_id": "EmployerInn"},
     'training_program' :        {"show_in_ui": True, "column_index": -1, "display_name": "Программа обучения",        "web_id": "LearnProgramIds"}, # 'LearnProgramId' 'LearnProgram'
-    'training_org' :            {"show_in_ui": True, "column_index": -1, "display_name": "Организация обучения",      "web_id": "OrganizationTitle"},
-    'training_org_inn' :        {"show_in_ui": True, "column_index": -1, "display_name": "ИНН организации обучения",  "web_id": "OrganizationTitle"},
+    'training_org' :            {"show_in_ui": True, "column_index": -1, "display_name": "Обучающая организация",      "web_id": "OrganizationTitle"},
+    'training_org_inn' :        {"show_in_ui": True, "column_index": -1, "display_name": "ИНН обучающей организации",  "web_id": "OrganizationTitle"},
     'knowledge_result' :        {"show_in_ui": True, "column_index": -1, "display_name": "Результат проверки знаний", "web_id": "IsPassed"},
     'knowledge_check_date' :    {"show_in_ui": True, "column_index": -1, "display_name": "Дата проверки знаний",      "web_id": "TestDate"},
     'protocol_number' :         {"show_in_ui": True, "column_index": -1, "display_name": "Номер протокола",           "web_id": "ProtocolNumber"},

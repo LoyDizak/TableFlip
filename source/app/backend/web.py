@@ -72,9 +72,12 @@ def fill_person_form(driver: webdriver.Chrome, person: Person) -> None:
         set_input_field_value(driver, input_field, input_value)
 
 
-def fill_person_form_new(driver: webdriver.Chrome, person: dict, template: dict) -> None:
+def fill_person_form_new(driver: webdriver.Chrome, person: dict[str, str], template: dict[str, dict]) -> None:
     switch_to_active_window(driver)
     for field, mapping in template.items():
+        if mapping["web_id"] == "":
+            continue
+        
         input_field: WebElement = find_input_field(driver, mapping["web_id"])
         input_value: str = person[field]
         set_input_field_value(driver, input_field, input_value)
