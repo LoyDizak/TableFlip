@@ -19,6 +19,7 @@ class ParserTab:
         
         self.create_parser_tab()
     
+    
     def create_parser_tab(self):
         left = ttk.Frame(self.main_tab, width=420)
         left.pack(side='left', fill='y', padx=10, pady=10)

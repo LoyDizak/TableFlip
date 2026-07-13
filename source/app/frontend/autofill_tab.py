@@ -3,9 +3,14 @@ from tkinter import ttk, filedialog, messagebox
 import threading
 import os
 
-from backend.web import open_browser, confirm_entry, fill_person_form
 from backend.json_handling import load_from_json
 from backend.to_string import persons_list_to_string, person_to_string
+from backend.web import (
+    open_browser,
+    confirm_entry,
+    open_form_page,
+    fill_person_form,
+)
 
 
 class AutofillTab:
@@ -186,6 +191,26 @@ class AutofillTab:
         if not self.app.check_license():
             return
 
-        self.on_button_confirm()
-        self.change_current_person(self.current_person_index + 1)
-        self.on_button_fill_info()
+        if not self.web_driver:
+            messagebox.showwarning("Внимание", "Сначала откройте страницу")
+            return
+
+        if not self.persons:
+            messagebox.showwarning("Внимание", "Сначала откройте файл с данными")
+            return
+
+        try:
+            confirm_entry(self.web_driver)
+            open_form_page(self.web_driver)
+
+            if self.current_person_index < len(self.persons) - 1:
+                self.change_current_person(self.current_person_index + 1)
+
+            fill_person_form(
+                self.web_driver,
+                self.persons[self.current_person_index],
+                self.template
+            )
+
+        except Exception as e:
+            messagebox.showerror("Ошибка", str(e))

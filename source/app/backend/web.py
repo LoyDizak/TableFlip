@@ -79,3 +79,7 @@ def confirm_entry(driver: webdriver.Chrome) -> None:
     switch_to_active_window(driver)
     btn = find_button(driver, "Сохранить")
     btn.click()
+
+def open_form_page(driver: webdriver.Chrome) -> None:
+    NEW_ENTRY_URL: str = "https://edu.rosmintrud.ru/reestr/pendingEducatedPerson/create?ReturnUrl=https%3A%2F%2Fedu.rosmintrud.ru%2Freestr%2FpendingEducatedPerson%2Flist"
+    driver.get(NEW_ENTRY_URL)

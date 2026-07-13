@@ -18,8 +18,6 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 
 
 class LicenseSystem:
-    """Система проверки лицензий"""
-
     def __init__(self, app_name: str, public_key: str):
         self.app_name: str = app_name
         self.public_key: str = public_key
@@ -32,6 +30,7 @@ class LicenseSystem:
         self.backup_date_file_path = self.config_dir / ".backup_run"
         self.boot_counter_file_path = self.config_dir / ".counter"
         self.private_key_file_path = self.config_dir / ".key"
+
 
     def _get_config_dir(self) -> Path:
         """Получить директорию для хранения конфигурации"""
@@ -229,6 +228,7 @@ class LicenseSystem:
         
         return hashlib.sha256(hwid.encode()).hexdigest()[:16]
 
+
     def set_license_key(self, new_key: str):
         # Простая проверка, что это похоже на base64 строку
         if not new_key or len(new_key.strip()) == 0:
@@ -250,6 +250,7 @@ class LicenseSystem:
                 return file.read().strip()
         except FileNotFoundError:
             return ""
+    
     
     def is_system_activated(self, be_gentle: bool = False):
         if (not self.public_key) and be_gentle:
