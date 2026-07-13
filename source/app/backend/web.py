@@ -32,18 +32,43 @@ def find_button(driver: webdriver.Chrome, button_value: str) -> WebElement:
     except:
         raise
 
-def set_input_field_value(driver: webdriver.Chrome, input_field: WebElement, value) -> None:
-    if input_field.tag_name == 'input': # text field
-        driver.execute_script("arguments[0].focus(); arguments[0].value = arguments[1]; arguments[0].dispatchEvent(new Event('input')); arguments[0].dispatchEvent(new Event('change'));", input_field, value)            
-    
-    if input_field.tag_name == 'select':    
-        select = Select(input_field)
-        # Try to select by value first
-        try:
-            select.select_by_value(str(value))
-        except:
-            print(f"Could not find value \"{value}\" in select options of {input_field.tag_name}")
 
+def set_input_field_value(driver: webdriver.Chrome, input_field: WebElement, value: str) -> None:
+    tag = input_field.tag_name.lower()
+
+    if tag == "input":
+        driver.execute_script("""
+            arguments[0].focus();
+            arguments[0].value = arguments[1];
+            arguments[0].dispatchEvent(new Event('input', { bubbles: true }));
+            arguments[0].dispatchEvent(new Event('change', { bubbles: true }));
+        """, input_field, value)
+        return
+
+    if tag == "select":
+        select = Select(input_field)
+
+        try:
+            # Сначала пытаемся выбрать по отображаемому тексту
+            select.select_by_visible_text(str(value))
+        except:
+            try:
+                # Если не получилось — по value
+                select.select_by_value(str(value))
+            except Exception:
+                available = [option.text for option in select.options]
+                raise ValueError(
+                    f'Не удалось выбрать "{value}". '
+                    f'Доступные значения: {available}'
+                )
+
+        # Для Select2
+        driver.execute_script("""
+            arguments[0].dispatchEvent(new Event('change', { bubbles: true }));
+        """, input_field)
+        return
+
+    raise NotImplementedError(f"Unsupported element: {tag}")
 
 def open_browser() -> webdriver.Chrome:
     chrome_options = Options()
@@ -64,15 +89,23 @@ def open_browser() -> webdriver.Chrome:
     return driver
 
 
-def fill_person_form(driver: webdriver.Chrome, person: dict[str, str], template: dict[str, dict]) -> None:
+def fill_person_form(driver: webdriver.Chrome,
+                     person: dict[str, str],
+                     template: dict[str, dict]) -> None:
     switch_to_active_window(driver)
+
     for field, mapping in template.items():
-        if mapping["web_id"] == "":
+        web_id = mapping["web_id"]
+
+        if not web_id:
             continue
 
-        input_field: WebElement = find_input_field(driver, mapping["web_id"])
-        input_value: str = person[field]
-        set_input_field_value(driver, input_field, input_value)
+        value = person.get(field, "")
+        if value == "":
+            continue
+
+        input_field = find_input_field(driver, web_id)
+        set_input_field_value(driver, input_field, value)
 
 
 def confirm_entry(driver: webdriver.Chrome) -> None:
