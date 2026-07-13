@@ -1,4 +1,5 @@
 from docx import Document
+import re
 
 
 def parse_table_data(table: list[list[str]], person_template: dict, start_row: int = 0) -> list[dict]:
@@ -11,7 +12,7 @@ def parse_table_data(table: list[list[str]], person_template: dict, start_row: i
             if column_index < 0:
                 person[field] = ""
             elif column_index < len(row):
-                person[field] = row[column_index].strip()
+                person[field] = sanitize_string(row[column_index])
             else:
                 raise
 
@@ -48,3 +49,10 @@ def extract_docx_table(docx_path: str, table_index: int) -> list[list[str]]:
         result.append(row_data)
 
     return result
+
+
+def sanitize_string(text: str) -> str:
+    text = text.strip()
+    text = re.sub(r"\s+", " ", text)
+    text = re.sub(r"[^\w ]", "", text, flags=re.UNICODE)
+    return text
