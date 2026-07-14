@@ -1,7 +1,7 @@
-Builds/
-chrome profile/
-Chrome/
+builds/
 dataset/
+setups/
+chrome/
 *.log
 
 # Byte-compiled / optimized / DLL files
